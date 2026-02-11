@@ -1,0 +1,106 @@
+@model MovieBox.ViewModels.CategorizeMovieVm
+
+@{
+    ViewData["Title"] = "Categorize Movie";
+}
+
+<h2>Categorize Movie</h2>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<form asp-action="CategorizeMovie" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+
+    <div class="mb-3">
+        <label asp-for="ListId" class="form-label">List</label>
+        <select asp-for="ListId" asp-items="Model.Lists" class="form-select">
+            <option value="">-- Select a list --</option>
+        </select>
+        <span asp-validation-for="ListId" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label">Title</label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-3">
+            <label asp-for="Year" class="form-label">Year</label>
+            <input asp-for="Year" class="form-control" type="number" />
+            <span asp-validation-for="Year" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <label asp-for="Length" class="form-label">Length (min)</label>
+            <input asp-for="Length" class="form-control" type="number" />
+            <span asp-validation-for="Length" class="text-danger"></span>
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <label asp-for="Language" class="form-label">Language</label>
+            <input asp-for="Language" class="form-control" />
+            <span asp-validation-for="Language" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label">Description</label>
+        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-3 mb-3 form-check">
+            <input asp-for="IsAvailable" class="form-check-input" />
+            <label asp-for="IsAvailable" class="form-check-label">Available</label>
+        </div>
+        <div class="col-md-3 mb-3 form-check">
+            <input asp-for="IsSeen" class="form-check-input" />
+            <label asp-for="IsSeen" class="form-check-label">Seen</label>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Categories</label>
+        <div class="border rounded p-2">
+            @if (Model.Categories?.Count > 0)
+            {
+                foreach (var c in Model.Categories)
+                {
+                    var cid = int.Parse(c.Value!);
+                    var isChecked = Model.SelectedCategoryIds.Contains(cid);
+
+                    <div class="form-check">
+                        <input class="form-check-input"
+                               type="checkbox"
+                               name="SelectedCategoryIds"
+                               value="@cid"
+                               @(isChecked ? "checked" : "") />
+                        <label class="form-check-label">@c.Text</label>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-muted">No categories found.</div>
+            }
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="PictureFile" class="form-label">Picture</label>
+        <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" />
+        <span asp-validation-for="PictureFile" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save Movie</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
