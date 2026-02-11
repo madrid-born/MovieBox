@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using MovieBox.Models;
 using MovieBox.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MovieBox.Controllers;
 
@@ -91,4 +92,94 @@ public class ManageController(ApplicationDbContext db) : Controller
         return x;
     }
 
+    [HttpGet]
+    public async Task<IActionResult> Category()
+    {
+        var vm = new CategoryVm();
+        await HydrateListsForCategory(vm);
+        await HydrateCategories(vm);
+        return View(vm);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> EditCategory(int id)
+    {
+        var cat = await db.Categories.FindAsync(id);
+        if (cat is null) return NotFound();
+
+        var vm = new CategoryVm
+        {
+            EditId = cat.Id,
+            Load = new LoadCategory { Name = cat.Name, ListId = cat.ListId }
+        };
+
+        await HydrateListsForCategory(vm);
+        await HydrateCategories(vm);
+
+        return View("Category", vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> SaveCategory(CategoryVm vm)
+    {
+        await HydrateListsForCategory(vm);
+
+        if (!ModelState.IsValid)
+        {
+            await HydrateCategories(vm);
+            return View("Category", vm);
+        }
+
+        var normalized = vm.Load.Name.Trim();
+        var listId = vm.Load.ListId!.Value;
+
+        if (vm.EditId is null)
+        {
+            var exists = await db.Categories.AnyAsync(c => c.ListId == listId && c.Name == normalized);
+            if (exists)
+            {
+                ModelState.AddModelError(nameof(vm.Load.Name), "A category with that name already exists in this list.");
+                await HydrateCategories(vm);
+                return View("Category", vm);
+            }
+
+            db.Categories.Add(new Category { Name = normalized, ListId = listId });
+            await db.SaveChangesAsync();
+            TempData["Success"] = "Category created!";
+        }
+        else
+        {
+            var cat = await db.Categories.FindAsync(vm.EditId.Value);
+            if (cat is null) return NotFound();
+
+            var exists = await db.Categories.AnyAsync(c => c.Id != cat.Id && c.ListId == listId && c.Name == normalized);
+
+            if (exists)
+            {
+                ModelState.AddModelError(nameof(vm.Load.Name), "A category with that name already exists in this list.");
+                await HydrateCategories(vm);
+                return View("Category", vm);
+            }
+
+            cat.Name = normalized;
+            cat.ListId = listId;
+            await db.SaveChangesAsync();
+            TempData["Success"] = "Category updated!";
+        }
+
+        return RedirectToAction(nameof(Category));
+    }
+
+    private async Task HydrateListsForCategory(CategoryVm vm)
+    {
+        vm.Lists = await db.Lists.OrderBy(l => l.Name)
+            .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync();
+    }
+
+    private async Task HydrateCategories(CategoryVm vm)
+    {
+        vm.Categories = await db.Categories.OrderBy(c => c.Name).Select(c => new CategoryVm.CategoryRow
+            { Id = c.Id, Title = c.Name, ListId = c.ListId, ListTitle = c.List.Name }).ToListAsync();
+    }
 }

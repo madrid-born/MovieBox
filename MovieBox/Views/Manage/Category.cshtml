@@ -1,0 +1,77 @@
+@model MovieBox.ViewModels.CategoryVm
+
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<h1>Category Manager</h1>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<hr />
+<br />
+
+<h3>@(Model.EditId == null ? "Create New Category" : "Edit Category")</h3>
+
+<form asp-action="SaveCategory" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="EditId" />
+
+    <div class="mb-3">
+        <label class="form-label">Category name</label>
+        <input asp-for="Load.Name" class="form-control" />
+        <span asp-validation-for="Load.Name" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">List</label>
+        <select asp-for="Load.ListId" asp-items="Model.Lists" class="form-select">
+            <option value="">-- Select a list --</option>
+        </select>
+        <span asp-validation-for="Load.ListId" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(Model.EditId == null ? "Create new category" : "Edit the category")
+    </button>
+
+    @if (Model.EditId != null)
+    {
+        <a asp-action="Category" class="btn btn-secondary ms-2">Cancel</a>
+    }
+</form>
+
+<br />
+<br />
+
+<table class="table table-striped table-hover align-middle">
+    <thead>
+    <tr>
+        <th>Category</th>
+        <th>List</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var c in Model.Categories)
+    {
+        <tr>
+            <td>@c.Title</td>
+            <td>@c.ListTitle</td>
+            <td>
+                <a asp-action="EditCategory" asp-route-id="@c.Id" class="btn btn-sm btn-outline-secondary">
+                    Edit
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
