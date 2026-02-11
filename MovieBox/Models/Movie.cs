@@ -16,4 +16,5 @@ public class Movie
     public string? Description { get; set; }
     public byte[]? Picture { get; set; }
     public virtual ICollection<CategorizedItems>? CategorizedItems { get; set; }
+    public virtual List List { get; set; }
 }
