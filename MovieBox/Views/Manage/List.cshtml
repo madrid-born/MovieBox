@@ -1,0 +1,62 @@
+@model MovieBox.ViewModels.ListVm
+
+@{
+    ViewData["Title"] = "Add List";
+}
+
+<h1>List Manager</h1>
+
+@if (TempData["Success"] is string msg)
+{
+    <div class="alert alert-success">@msg</div>
+}
+
+<hr/>
+<br/>
+
+<h3>Create New List</h3>
+
+<form asp-action="SaveList" method="post">
+    @Html.AntiForgeryToken()
+
+    <input type="hidden" asp-for="EditId" />
+
+    <div class="mb-3">
+        <input asp-for="Load.Name" class="form-control" />
+        <span asp-validation-for="Load.Name" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">
+        @(Model.EditId == null ? "Create new list" : "Edit the list")
+    </button>
+</form>
+
+<br/>
+<br/>
+
+<table class="table table-striped table-hover align-middle">
+    <thead>
+    <tr>
+        <th>Title</th>
+        <th></th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var m in Model.Lists)
+    {
+        <tr>
+            <td>@m.Title</td>
+            <td>
+                <a asp-action="EditList" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">
+                    Edit
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
