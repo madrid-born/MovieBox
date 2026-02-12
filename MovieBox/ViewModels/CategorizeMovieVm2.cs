@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace MovieBox.ViewModels;
 
-public class CategorizeMovieVm
+public class CategorizeMovieVm2
 {
     [Required]
     public int ListId { get; set; }

@@ -20,7 +20,7 @@ public class MoviesController : Controller
     [HttpGet]
     public async Task<IActionResult> CategorizeMovie()
     {
-        var vm = new CategorizeMovieVm
+        var vm = new CategorizeMovieVm2
         {
             Lists = await _db.Lists
                 .OrderBy(l => l.Name)
@@ -39,17 +39,17 @@ public class MoviesController : Controller
     // POST: /Movies/CategorizeMovie
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> CategorizeMovie(CategorizeMovieVm vm)
+    public async Task<IActionResult> CategorizeMovie(CategorizeMovieVm2 vm2)
     {
         // Re-load dropdown/checkbox sources if validation fails
         async Task ReloadLookups()
         {
-            vm.Lists = await _db.Lists
+            vm2.Lists = await _db.Lists
                 .OrderBy(l => l.Name)
                 .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
                 .ToListAsync();
 
-            vm.Categories = await _db.Categories
+            vm2.Categories = await _db.Categories
                 .OrderBy(c => c.Name)
                 .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
                 .ToListAsync();
@@ -58,56 +58,56 @@ public class MoviesController : Controller
         if (!ModelState.IsValid)
         {
             await ReloadLookups();
-            return View(vm);
+            return View(vm2);
         }
 
         // Optional: basic existence checks
-        var listExists = await _db.Lists.AnyAsync(l => l.Id == vm.ListId);
+        var listExists = await _db.Lists.AnyAsync(l => l.Id == vm2.ListId);
         if (!listExists)
         {
-            ModelState.AddModelError(nameof(vm.ListId), "Selected list does not exist.");
+            ModelState.AddModelError(nameof(vm2.ListId), "Selected list does not exist.");
             await ReloadLookups();
-            return View(vm);
+            return View(vm2);
         }
 
-        if (vm.SelectedCategoryIds.Count > 0)
+        if (vm2.SelectedCategoryIds.Count > 0)
         {
             var validCategoryIds = await _db.Categories
-                .Where(c => vm.SelectedCategoryIds.Contains(c.Id))
+                .Where(c => vm2.SelectedCategoryIds.Contains(c.Id))
                 .Select(c => c.Id)
                 .ToListAsync();
 
             // Remove any ids that aren't real
-            vm.SelectedCategoryIds = validCategoryIds;
+            vm2.SelectedCategoryIds = validCategoryIds;
         }
 
         byte[]? pictureBytes = null;
-        if (vm.PictureFile is not null && vm.PictureFile.Length > 0)
+        if (vm2.PictureFile is not null && vm2.PictureFile.Length > 0)
         {
             using var ms = new MemoryStream();
-            await vm.PictureFile.CopyToAsync(ms);
+            await vm2.PictureFile.CopyToAsync(ms);
             pictureBytes = ms.ToArray();
         }
 
         var movie = new Movie
         {
-            ListId = vm.ListId,
-            Title = vm.Title.Trim(),
-            Length = vm.Length,
-            Language = vm.Language?.Trim(),
-            Year = vm.Year,
-            IsAvailable = vm.IsAvailable,
-            IsSeen = vm.IsSeen,
-            Description = vm.Description?.Trim(),
+            ListId = vm2.ListId,
+            Title = vm2.Title.Trim(),
+            Length = vm2.Length,
+            Language = vm2.Language?.Trim(),
+            Year = vm2.Year,
+            IsAvailable = vm2.IsAvailable,
+            IsSeen = vm2.IsSeen,
+            Description = vm2.Description?.Trim(),
             // Picture = pictureBytes
         };
 
         _db.Movies.Add(movie);
         await _db.SaveChangesAsync(); // movie.Id is now generated
 
-        if (vm.SelectedCategoryIds.Count > 0)
+        if (vm2.SelectedCategoryIds.Count > 0)
         {
-            var joinRows = vm.SelectedCategoryIds
+            var joinRows = vm2.SelectedCategoryIds
                 .Distinct()
                 .Select(catId => new CategorizedItems
                 {

@@ -1,22 +1,22 @@
-@model MovieBox.ViewModels.CategorizeMovieVm2
+@model MovieBox.ViewModels.CategorizeMovieVm
 
 @{
-    ViewData["Title"] = "Categorize Movie";
+ViewData["Title"] = "Categorize Movie";
 }
 
 <h2>Categorize Movie</h2>
 
 @if (TempData["Success"] is string msg)
 {
-    <div class="alert alert-success">@msg</div>
+<div class="alert alert-success">@msg</div>
 }
 
-<form asp-action="CategorizeMovie" method="post" enctype="multipart/form-data">
+<form asp-action="Categorize" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
 
     <div class="mb-3">
         <label asp-for="ListId" class="form-label">List</label>
-        <select asp-for="ListId" asp-items="Model.Lists" class="form-select">
+        <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
             <option value="">-- Select a list --</option>
         </select>
         <span asp-validation-for="ListId" class="text-danger"></span>
@@ -56,13 +56,20 @@
 
     <div class="row">
         <div class="col-md-3 mb-3 form-check">
-            <input asp-for="IsAvailable" class="form-check-input" />
+            <input asp-for="IsAvailable" class="form-check-input" id="isAvailableChk" />
             <label asp-for="IsAvailable" class="form-check-label">Available</label>
         </div>
+
         <div class="col-md-3 mb-3 form-check">
             <input asp-for="IsSeen" class="form-check-input" />
             <label asp-for="IsSeen" class="form-check-label">Seen</label>
         </div>
+    </div>
+
+    <div class="mb-3" id="localAddressWrap" style="display:none;">
+        <label asp-for="LocalAddress" class="form-label">Local Address</label>
+        <input asp-for="LocalAddress" class="form-control" />
+        <span asp-validation-for="LocalAddress" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
@@ -70,24 +77,24 @@
         <div class="border rounded p-2">
             @if (Model.Categories?.Count > 0)
             {
-                foreach (var c in Model.Categories)
-                {
-                    var cid = int.Parse(c.Value!);
-                    var isChecked = Model.SelectedCategoryIds.Contains(cid);
+            foreach (var c in Model.Categories)
+            {
+            var cid = int.Parse(c.Value!);
+            var isChecked = Model.SelectedCategoryIds.Contains(cid);
 
-                    <div class="form-check">
-                        <input class="form-check-input"
-                               type="checkbox"
-                               name="SelectedCategoryIds"
-                               value="@cid"
-                               @(isChecked ? "checked" : "") />
-                        <label class="form-check-label">@c.Text</label>
-                    </div>
-                }
+            <div class="form-check">
+                <input class="form-check-input"
+                       type="checkbox"
+                       name="SelectedCategoryIds"
+                       value="@cid"
+                       @(isChecked ? "checked" : "") />
+                <label class="form-check-label">@c.Text</label>
+            </div>
+            }
             }
             else
             {
-                <div class="text-muted">No categories found.</div>
+            <div class="text-muted">No categories found for this list.</div>
             }
         </div>
     </div>
@@ -102,5 +109,28 @@
 </form>
 
 @section Scripts {
-    <partial name="_ValidationScriptsPartial" />
+<partial name="_ValidationScriptsPartial" />
+
+<script>
+    function toggleLocalAddress() {
+        const chk = document.getElementById('isAvailableChk');
+        const wrap = document.getElementById('localAddressWrap');
+        wrap.style.display = chk.checked ? 'block' : 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        toggleLocalAddress();
+        document.getElementById('isAvailableChk').addEventListener('change', toggleLocalAddress);
+
+        // Reload page when list changes so categories refresh
+        const listSelect = document.getElementById('listSelect');
+        listSelect.addEventListener('change', function () {
+            const val = listSelect.value;
+            const url = new URL(window.location.href);
+            if (val) url.searchParams.set('listId', val);
+            else url.searchParams.delete('listId');
+            window.location.href = url.toString();
+        });
+    });
+</script>
 }

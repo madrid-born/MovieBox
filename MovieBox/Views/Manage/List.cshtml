@@ -1,7 +1,7 @@
 @model MovieBox.ViewModels.ListVm
 
 @{
-    ViewData["Title"] = "Add List";
+    ViewData["Title"] = "Manage List";
 }
 
 <h1>List Manager</h1>
@@ -14,7 +14,7 @@
 <hr/>
 <br/>
 
-<h3>Create New List</h3>
+<h3>@(Model.EditId == null ? "Create New List" : "Edit List")</h3>
 
 <form asp-action="SaveList" method="post">
     @Html.AntiForgeryToken()
@@ -29,6 +29,12 @@
     <button type="submit" class="btn btn-primary">
         @(Model.EditId == null ? "Create new list" : "Edit the list")
     </button>
+    
+    
+    @if (Model.EditId != null)
+    {
+        <a asp-action="List" class="btn btn-secondary ms-2">Cancel</a>
+    }
 </form>
 
 <br/>
@@ -47,9 +53,7 @@
         <tr>
             <td>@m.Title</td>
             <td>
-                <a asp-action="EditList" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">
-                    Edit
-                </a>
+                <a asp-action="EditList" asp-route-id="@m.Id" class="btn btn-sm btn-outline-secondary">Edit</a>
             </td>
         </tr>
     }
