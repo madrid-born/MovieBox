@@ -6,6 +6,7 @@ public class Movie
 {
     [Key]
     public int Id { get; set; }
+    public bool IsDeleted { get; set; }
     public int ListId { get; set; }
     public string Title { get; set; }
     public int? Length { get; set; }
@@ -14,7 +15,8 @@ public class Movie
     public bool? IsAvailable { get; set; }
     public bool? IsSeen { get; set; }
     public string? Description { get; set; }
-    public byte[]? Picture { get; set; }
+    public string? PictureAddress {get; set; }
+    public string? LocalAddress { get; set; }
     public virtual ICollection<CategorizedItems>? CategorizedItems { get; set; }
     public virtual List List { get; set; }
 }

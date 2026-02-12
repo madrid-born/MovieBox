@@ -99,7 +99,7 @@ public class MoviesController : Controller
             IsAvailable = vm.IsAvailable,
             IsSeen = vm.IsSeen,
             Description = vm.Description?.Trim(),
-            Picture = pictureBytes
+            // Picture = pictureBytes
         };
 
         _db.Movies.Add(movie);
