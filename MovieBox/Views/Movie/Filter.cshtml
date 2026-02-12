@@ -1,0 +1,113 @@
+@model MovieBox.ViewModels.FilterMoviesVm
+
+@{
+    ViewData["Title"] = "Filter Movies";
+}
+
+<h2>Filter Movies</h2>
+
+<form asp-action="Filter" method="get">
+    <div class="mb-3">
+        <label class="form-label">List</label>
+        <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
+            <option value="">-- Select a list --</option>
+        </select>
+    </div>
+
+    @if (Model.ListId != null)
+    {
+        <div class="mb-3">
+            <label class="form-label">Categories (intersection)</label>
+
+            <div class="border rounded p-2">
+                @if (Model.Categories.Count > 0)
+                {
+                    foreach (var c in Model.Categories)
+                    {
+                        var cid = int.Parse(c.Value!);
+                        var isChecked = Model.SelectedCategoryIds.Contains(cid);
+
+                        <div class="form-check">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="SelectedCategoryIds"
+                                   value="@cid"
+                                   @(isChecked ? "checked" : "") />
+                            <label class="form-check-label">@c.Text</label>
+                        </div>
+                    }
+                }
+                else
+                {
+                    <div class="text-muted">No categories found for this list.</div>
+                }
+            </div>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Apply Filter</button>
+        <a asp-action="Filter" asp-route-listId="@Model.ListId" class="btn btn-secondary ms-2">Clear categories</a>
+    }
+</form>
+
+<hr />
+
+@if (Model.ListId == null)
+{
+    <div class="text-muted">Select a list to start filtering.</div>
+}
+else
+{
+    <h4>Results (@Model.Movies.Count)</h4>
+
+    @if (Model.Movies.Count == 0)
+    {
+        <div class="text-muted">No movies match the selected categories.</div>
+    }
+    else
+    {
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+            <tr>
+                <th>Poster</th>
+                <th>Title</th>
+                <th>Year</th>
+                <th>Available</th>
+                <th>Seen</th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var m in Model.Movies)
+            {
+                <tr>
+                    <td style="width:90px;">
+                        @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
+                        {
+                            <img src="@m.PictureAddress" style="height:80px;" class="img-thumbnail" />
+                        }
+                    </td>
+                    <td>@m.Title</td>
+                    <td>@m.Year</td>
+                    <td>@(m.IsAvailable == true ? "Yes" : "No")</td>
+                    <td>@(m.IsSeen == true ? "Yes" : "No")</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    }
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const listSelect = document.getElementById('listSelect');
+            listSelect.addEventListener('change', function () {
+                const val = listSelect.value;
+                const url = new URL(window.location.href);
+                if (val) url.searchParams.set('listId', val);
+                else url.searchParams.delete('listId');
+                url.searchParams.delete('SelectedCategoryIds');
+                window.location.href = url.toString();
+            });
+        });
+    </script>
+}

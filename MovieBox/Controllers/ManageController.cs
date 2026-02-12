@@ -13,6 +13,7 @@ public class ManageController(ApplicationDbContext db) : Controller
     {
         return View();
     }
+    
     #region List
 
         [HttpGet]

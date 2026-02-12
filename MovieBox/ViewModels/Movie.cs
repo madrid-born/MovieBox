@@ -26,3 +26,22 @@ public class CategorizeMovieVm
     public List<SelectListItem> Categories { get; set; } = [];
     public List<int> SelectedCategoryIds { get; set; } = [];
 }
+
+public class FilterMoviesVm
+{
+    public int? ListId { get; set; }
+    public List<SelectListItem> Lists { get; set; } = [];
+    public List<SelectListItem> Categories { get; set; } = [];
+    public List<int> SelectedCategoryIds { get; set; } = [];
+    public List<MovieRow> Movies { get; set; } = [];
+
+    public class MovieRow
+    {
+        public int Id { get; set; }
+        public string Title { get; set; } = "";
+        public int? Year { get; set; }
+        public bool? IsSeen { get; set; }
+        public bool? IsAvailable { get; set; }
+        public string? PictureAddress { get; set; }
+    }
+}
