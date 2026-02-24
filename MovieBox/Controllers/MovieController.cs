@@ -237,6 +237,29 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
 
             moviesQuery = moviesQuery.Where(m => movieIds.Contains(m.Id));
         }
+        
+        // Distinct languages (case-insensitive) for this list
+        var languagesRaw = await db.Movies
+            .Where(m => m.ListId == listId && !string.IsNullOrWhiteSpace(m.Language))
+            .Select(m => m.Language!.Trim())
+            .ToListAsync();
+
+// Group case-insensitively
+        var distinctLanguages = languagesRaw
+            .GroupBy(l => l.ToLower())
+            .Select(g => g.First())     // keep original casing of first occurrence
+            .OrderBy(l => l)
+            .ToList();
+
+        vm.Languages = distinctLanguages
+            .Select(l => new SelectListItem
+            {
+                Value = l,
+                Text = l,
+                Selected = vm.Language != null && 
+                           l.Equals(vm.Language, StringComparison.OrdinalIgnoreCase)
+            })
+            .ToList();
 
         if (isDeleted.HasValue) moviesQuery = moviesQuery.Where(m => m.IsDeleted == isDeleted.Value);
 
@@ -248,8 +271,14 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
 
         if (maxLength.HasValue) moviesQuery = moviesQuery.Where(m => m.Length.HasValue && m.Length.Value <= maxLength.Value);
 
-        if (!string.IsNullOrWhiteSpace(language)) moviesQuery = moviesQuery.Where(m => m.Language != null && m.Language == language.Trim());
-
+        if (!string.IsNullOrWhiteSpace(language))
+        {
+            var lang = language.Trim().ToLower();
+            moviesQuery = moviesQuery.Where(m =>
+                m.Language != null &&
+                m.Language.ToLower() == lang);
+        }
+        
         if (minYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value >= minYear.Value);
 
         if (maxYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value <= maxYear.Value);

@@ -36,7 +36,7 @@ public class FilterMoviesVm
     public List<MovieRow> Movies { get; set; } = [];
     public List<SelectListItem> Lists { get; set; } = new();
     public List<SelectListItem> Categories { get; set; } = new();
-
+    public List<SelectListItem> Languages { get; set; } = new();
     public bool? IsDeleted { get; set; }
     public bool? IsAvailable { get; set; }
     public bool? IsSeen { get; set; }
