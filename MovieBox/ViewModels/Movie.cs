@@ -5,10 +5,9 @@ namespace MovieBox.ViewModels;
 
 public class CategorizeMovieVm
 {
-    [Required]
-    public int? ListId { get; set; }
+    public int? Id { get; set; }  // NEW (null => create, not null => edit)
 
-    [Required, StringLength(200)]
+    public int? ListId { get; set; }
     public string Title { get; set; } = "";
 
     public int? Year { get; set; }
@@ -16,14 +15,20 @@ public class CategorizeMovieVm
     public string? Language { get; set; }
     public string? Description { get; set; }
 
-    public bool IsAvailable { get; set; }
-    public bool IsSeen { get; set; }
+    public bool? IsAvailable { get; set; }
+    public bool? IsSeen { get; set; }
     public string? LocalAddress { get; set; }
+
+    public List<int> SelectedCategoryIds { get; set; } = new();
+
     public IFormFile? PictureFile { get; set; }
-    public List<SelectListItem> Lists { get; set; } = [];
-    public List<SelectListItem> Categories { get; set; } = [];
-    public List<int> SelectedCategoryIds { get; set; } = [];
+
+    public string? ExistingPictureAddress { get; set; } // NEW (optional)
+
+    public List<SelectListItem> Lists { get; set; } = new();
+    public List<SelectListItem> Categories { get; set; } = new();
 }
+
 public class FilterMoviesVm
 {
     public int? ListId { get; set; }

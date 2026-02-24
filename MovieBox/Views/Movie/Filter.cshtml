@@ -151,7 +151,13 @@ else
                             <img src="@m.PictureAddress" style="height:80px;" class="img-thumbnail" alt=""/>
                         }
                     </td>
-                    <td>@m.Title</td>
+                    <td>
+                        <a asp-action="Categorize"
+                           asp-route-listId="@Model.ListId"
+                           asp-route-movieId="@m.Id">
+                            @m.Title
+                        </a>
+                    </td>
                     <td>@m.Year</td>
                     <td>@(m.IsAvailable == true ? "Yes" : "No")</td>
                     <td>@(m.IsSeen == true ? "Yes" : "No")</td>

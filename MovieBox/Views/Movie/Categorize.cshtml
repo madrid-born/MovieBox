@@ -4,7 +4,7 @@
 ViewData["Title"] = "Categorize Movie";
 }
 
-<h2>Categorize Movie</h2>
+<h2>@(Model.Id.HasValue ? "Edit Movie" : "Categorize Movie")</h2>
 
 @if (TempData["Success"] is string msg)
 {
@@ -13,7 +13,8 @@ ViewData["Title"] = "Categorize Movie";
 
 <form asp-action="Categorize" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
-
+    <input type="hidden" asp-for="Id" />
+    
     <div class="mb-3">
         <label asp-for="ListId" class="form-label">List</label>
         <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
@@ -104,8 +105,18 @@ ViewData["Title"] = "Categorize Movie";
         <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" />
         <span asp-validation-for="PictureFile" class="text-danger"></span>
     </div>
+    
+    @if (Model.Id.HasValue && !string.IsNullOrWhiteSpace(Model.ExistingPictureAddress))
+    {
+        <div class="mb-3">
+            <label class="form-label">Current Picture</label><br />
+            <img src="@Model.ExistingPictureAddress" class="img-thumbnail" style="height:140px;" alt="" />
+        </div>
+    }
 
-    <button type="submit" class="btn btn-primary">Save Movie</button>
+    <button type="submit" class="btn btn-primary">
+        @(Model.Id.HasValue ? "Save Changes" : "Save Movie")
+    </button>
 </form>
 
 @section Scripts {

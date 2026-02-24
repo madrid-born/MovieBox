@@ -18,69 +18,126 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
 
     #region Categorize
 
-        [HttpGet]
-        public async Task<IActionResult> Categorize(int? listId)
-        {
-            var vm = new CategorizeMovieVm { ListId = listId };
+    [HttpGet]
+    public async Task<IActionResult> Categorize(int? listId, int? movieId)
+    {
+        var vm = new CategorizeMovieVm();
 
-            await ReloadLookups(vm);
+        if (movieId.HasValue)
+        {
+            var movie = await db.Movies
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.Id == movieId.Value);
+
+            if (movie == null) return NotFound();
+
+            vm.Id = movie.Id;
+            vm.ListId = movie.ListId;
+            vm.Title = movie.Title;
+            vm.Year = movie.Year;
+            vm.Length = movie.Length;
+            vm.Language = movie.Language;
+            vm.Description = movie.Description;
+            vm.IsAvailable = movie.IsAvailable;
+            vm.IsSeen = movie.IsSeen;
+            vm.LocalAddress = movie.LocalAddress;
+            vm.ExistingPictureAddress = movie.PictureAddress;
+
+            vm.SelectedCategoryIds = await db.CategorizedItems
+                .Where(ci => ci.MovieId == movie.Id)
+                .Select(ci => ci.CategoryId)
+                .ToListAsync();
+        }
+        else
+        {
+            vm.ListId = listId;
+        }
+
+        await ReloadLookups(vm);
+        return View(vm);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Categorize(CategorizeMovieVm vm)
+    {
+        await ReloadLookups(vm);
+
+        if (!ModelState.IsValid) return View(vm);
+
+        var listExists = await db.Lists.AnyAsync(l => l.Id == vm.ListId);
+        if (!listExists)
+        {
+            ModelState.AddModelError(nameof(vm.ListId), "Selected list does not exist.");
             return View(vm);
         }
 
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Categorize(CategorizeMovieVm vm)
+        // validate categories belong to the list
+        if (vm.SelectedCategoryIds.Count > 0)
         {
-            await ReloadLookups(vm);
+            vm.SelectedCategoryIds = await db.Categories
+                .Where(c => c.ListId == vm.ListId && vm.SelectedCategoryIds.Contains(c.Id))
+                .Select(c => c.Id)
+                .ToListAsync();
+        }
 
-            if (!ModelState.IsValid) return View(vm);
+        // if edit: load existing movie; else create new
+        Movie movie;
+        if (vm.Id.HasValue)
+        {
+            movie = await db.Movies.FirstOrDefaultAsync(m => m.Id == vm.Id.Value);
+            if (movie == null) return NotFound();
 
-            var listExists = await db.Lists.AnyAsync(l => l.Id == vm.ListId);
-            if (!listExists)
+            // Optional safety: prevent editing a movie under a different list than selected
+            // If you DO want to allow moving movies between lists, remove this check.
+            if (movie.ListId != vm.ListId!.Value)
             {
-                ModelState.AddModelError(nameof(vm.ListId), "Selected list does not exist.");
+                ModelState.AddModelError(nameof(vm.ListId), "Movie does not belong to selected list.");
                 return View(vm);
             }
-
-            if (vm.SelectedCategoryIds.Count > 0)
-            {
-                vm.SelectedCategoryIds = await db.Categories.Where(c => c.ListId == vm.ListId && vm.SelectedCategoryIds.Contains(c.Id))
-                    .Select(c => c.Id).ToListAsync();
-            }
-
-            string? pictureAddress = null;
-            if (vm.PictureFile is not null && vm.PictureFile.Length > 0) pictureAddress = await SaveResizedMovieImage(vm.PictureFile);
-
-            var movie = new Movie
-            {
-                IsDeleted = false,
-                ListId = vm.ListId!.Value,
-                Title = vm.Title.Trim(),
-                Length = vm.Length,
-                Language = vm.Language?.Trim(),
-                Year = vm.Year,
-                IsAvailable = vm.IsAvailable,
-                IsSeen = vm.IsSeen,
-                Description = vm.Description?.Trim(),
-                PictureAddress = pictureAddress,
-                LocalAddress = vm.IsAvailable ? vm.LocalAddress?.Trim() : null
-            };
-
-            db.Movies.Add(movie);
-            await db.SaveChangesAsync();
-
-            if (vm.SelectedCategoryIds.Count > 0)
-            {
-                var joinRows = vm.SelectedCategoryIds.Distinct()
-                    .Select(catId => new CategorizedItems { MovieId = movie.Id, CategoryId = catId });
-
-                db.CategorizedItems.AddRange(joinRows);
-                await db.SaveChangesAsync();
-            }
-
-            TempData["Success"] = "Movie added and categorized!";
-            return RedirectToAction(nameof(Categorize), new { listId = vm.ListId });
         }
+        else
+        {
+            movie = new Movie { IsDeleted = false };
+            db.Movies.Add(movie);
+        }
+
+        // picture (only replace if user uploaded a new one)
+        if (vm.PictureFile is not null && vm.PictureFile.Length > 0)
+        {
+            movie.PictureAddress = await SaveResizedMovieImage(vm.PictureFile);
+        }
+
+        // map fields
+        movie.ListId = vm.ListId!.Value;
+        movie.Title = vm.Title.Trim();
+        movie.Length = vm.Length;
+        movie.Language = vm.Language?.Trim();
+        movie.Year = vm.Year;
+        movie.IsAvailable = vm.IsAvailable;
+        movie.IsSeen = vm.IsSeen;
+        movie.Description = vm.Description?.Trim();
+        movie.LocalAddress = vm.IsAvailable == true ? vm.LocalAddress?.Trim() : null;
+
+        await db.SaveChangesAsync();
+
+        // update categories: simplest = remove and re-add
+        var existing = await db.CategorizedItems.Where(ci => ci.MovieId == movie.Id).ToListAsync();
+        if (existing.Count > 0) db.CategorizedItems.RemoveRange(existing);
+
+        if (vm.SelectedCategoryIds.Count > 0)
+        {
+            var joinRows = vm.SelectedCategoryIds.Distinct()
+                .Select(catId => new CategorizedItems { MovieId = movie.Id, CategoryId = catId });
+
+            db.CategorizedItems.AddRange(joinRows);
+        }
+
+        await db.SaveChangesAsync();
+
+        TempData["Success"] = vm.Id.HasValue ? "Movie updated!" : "Movie added and categorized!";
+        return RedirectToAction(nameof(Categorize), new { listId = movie.ListId, movieId = movie.Id });
+    }
 
         private async Task ReloadLookups(CategorizeMovieVm vm)
         {
