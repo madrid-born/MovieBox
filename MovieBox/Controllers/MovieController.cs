@@ -38,8 +38,8 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
             vm.Length = movie.Length;
             vm.Language = movie.Language;
             vm.Description = movie.Description;
-            vm.IsAvailable = movie.IsAvailable;
-            vm.IsSeen = movie.IsSeen;
+            vm.IsAvailable = movie.IsAvailable ?? false;
+            vm.IsSeen = movie.IsSeen ?? false;
             vm.LocalAddress = movie.LocalAddress;
             vm.ExistingPictureAddress = movie.PictureAddress;
 
@@ -219,14 +219,14 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
     public async Task<IActionResult> Filter(
         int? listId,
         List<int>? selectedCategoryIds,
-        bool? isDeleted,
-        bool? isAvailable,
-        bool? isSeen,
         int? minLength,
         int? maxLength,
         string? language,
         int? minYear,
-        int? maxYear
+        int? maxYear,
+        bool? isAvailable,
+        bool? isSeen,
+        bool? isDeleted = false
     )
     {
         selectedCategoryIds ??= new List<int>();

@@ -19,8 +19,8 @@ public class CategorizeMovieVm
     public string? NewLanguage { get; set; }
     public string? Description { get; set; }
 
-    public bool? IsAvailable { get; set; }
-    public bool? IsSeen { get; set; }
+    public bool IsAvailable { get; set; }
+    public bool IsSeen { get; set; }
     public string? LocalAddress { get; set; }
 
     public List<int> SelectedCategoryIds { get; set; } = new();
