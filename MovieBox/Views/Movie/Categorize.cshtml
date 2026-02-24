@@ -43,8 +43,29 @@ ViewData["Title"] = "Categorize Movie";
         </div>
 
         <div class="col-md-6 mb-3">
-            <label asp-for="Language" class="form-label">Language</label>
-            <input asp-for="Language" class="form-control" />
+            <label class="form-label">Language</label>
+
+            <select class="form-select" id="languageSelect" asp-for="Language">
+                <option value="">-- Select language --</option>
+
+                @foreach (var lang in Model.Languages)
+                {
+                    // mark selected case-insensitively
+                    var selected = !string.IsNullOrWhiteSpace(Model.Language)
+                                   && lang.Value != null
+                                   && lang.Value.Equals(Model.Language, StringComparison.OrdinalIgnoreCase);
+
+                    <option value="@lang.Value" selected="@(selected ? "selected" : null)">@lang.Text</option>
+                }
+
+                <option value="__other__">Other...</option>
+            </select>
+
+            <div class="mt-2" id="newLanguageWrap" style="display:none;">
+                <input asp-for="NewLanguage" class="form-control" placeholder="Enter new language..." />
+                <span asp-validation-for="NewLanguage" class="text-danger"></span>
+            </div>
+
             <span asp-validation-for="Language" class="text-danger"></span>
         </div>
     </div>
@@ -142,6 +163,25 @@ ViewData["Title"] = "Categorize Movie";
             else url.searchParams.delete('listId');
             window.location.href = url.toString();
         });
+    });
+
+    function toggleNewLanguage() {
+        const sel = document.getElementById('languageSelect');
+        const wrap = document.getElementById('newLanguageWrap');
+        const isOther = sel.value === '__other__';
+        wrap.style.display = isOther ? 'block' : 'none';
+
+        // If not "Other", clear typed value so it doesn't override
+        if (!isOther) {
+            const newLangInput = document.querySelector('[name="NewLanguage"]');
+            if (newLangInput) newLangInput.value = '';
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // existing code...
+        toggleNewLanguage();
+        document.getElementById('languageSelect').addEventListener('change', toggleNewLanguage);
     });
 </script>
 }

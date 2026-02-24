@@ -13,6 +13,10 @@ public class CategorizeMovieVm
     public int? Year { get; set; }
     public int? Length { get; set; }
     public string? Language { get; set; }
+    public List<SelectListItem> Languages { get; set; } = new();
+
+    // Only used when user picks "Other..."
+    public string? NewLanguage { get; set; }
     public string? Description { get; set; }
 
     public bool? IsAvailable { get; set; }

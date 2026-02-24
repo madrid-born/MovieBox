@@ -64,6 +64,22 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         await ReloadLookups(vm);
 
         if (!ModelState.IsValid) return View(vm);
+        // ✅ NEW: Language selection logic
+        if (!string.IsNullOrWhiteSpace(vm.NewLanguage))
+        {
+            vm.Language = vm.NewLanguage.Trim();
+        }
+        else
+        {
+            vm.Language = vm.Language?.Trim();
+
+            // if user selected "Other..." but didn't type anything
+            if (vm.Language == "__other__")
+                vm.Language = null;
+        }
+
+        if (string.IsNullOrWhiteSpace(vm.Language))
+            vm.Language = null;
 
         var listExists = await db.Lists.AnyAsync(l => l.Id == vm.ListId);
         if (!listExists)
@@ -112,7 +128,7 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         movie.ListId = vm.ListId!.Value;
         movie.Title = vm.Title.Trim();
         movie.Length = vm.Length;
-        movie.Language = vm.Language?.Trim();
+        movie.Language = vm.Language;
         movie.Year = vm.Year;
         movie.IsAvailable = vm.IsAvailable;
         movie.IsSeen = vm.IsSeen;
@@ -139,21 +155,44 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         return RedirectToAction(nameof(Categorize), new { listId = movie.ListId, movieId = movie.Id });
     }
 
-        private async Task ReloadLookups(CategorizeMovieVm vm)
-        {
-            vm.Lists = await db.Lists.OrderBy(l => l.Name)
-                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync();
+    private async Task ReloadLookups(CategorizeMovieVm vm)
+    {
+        vm.Lists = await db.Lists.OrderBy(l => l.Name)
+            .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+            .ToListAsync();
 
-            if (vm.ListId is not null)
+        if (vm.ListId is not null)
+        {
+            vm.Categories = await db.Categories
+                .Where(c => c.ListId == vm.ListId)
+                .OrderBy(c => c.Name)
+                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+                .ToListAsync();
+
+            // ✅ NEW: Languages dropdown (distinct, case-insensitive)
+            var raw = await db.Movies
+                .Where(m => m.ListId == vm.ListId && !string.IsNullOrWhiteSpace(m.Language))
+                .Select(m => m.Language!.Trim())
+                .ToListAsync();
+
+            var distinct = raw
+                .GroupBy(x => x.ToLower())
+                .Select(g => g.First())
+                .OrderBy(x => x)
+                .ToList();
+
+            vm.Languages = distinct.Select(x => new SelectListItem
             {
-                vm.Categories = await db.Categories.Where(c => c.ListId == vm.ListId).OrderBy(c => c.Name)
-                    .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();
-            }
-            else
-            {
-                vm.Categories = [];
-            }
+                Value = x,
+                Text = x
+            }).ToList();
         }
+        else
+        {
+            vm.Categories = [];
+            vm.Languages = [];
+        }
+    }
 
         private async Task<string> SaveResizedMovieImage(IFormFile file)
         {
