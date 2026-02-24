@@ -43,9 +43,75 @@
                 }
             </div>
         </div>
+        
+        <div class="mb-3 mt-4">
+            <h5>Filters</h5>
+
+            <div class="border rounded p-3">
+
+                <div class="row g-3">
+
+                    <div class="col-md-4">
+                        <label class="form-label">Deleted</label>
+                        <select class="form-select" name="isDeleted">
+                            <option value="" selected="@(Model.IsDeleted == null)">Any</option>
+                            <option value="false" selected="@(Model.IsDeleted == false)">Not deleted</option>
+                            <option value="true" selected="@(Model.IsDeleted == true)">Deleted</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Available</label>
+                        <select class="form-select" name="isAvailable">
+                            <option value="" selected="@(Model.IsAvailable == null)">Any</option>
+                            <option value="true" selected="@(Model.IsAvailable == true)">Yes</option>
+                            <option value="false" selected="@(Model.IsAvailable == false)">No</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4">
+                        <label class="form-label">Seen</label>
+                        <select class="form-select" name="isSeen">
+                            <option value="" selected="@(Model.IsSeen == null)">Any</option>
+                            <option value="true" selected="@(Model.IsSeen == true)">Yes</option>
+                            <option value="false" selected="@(Model.IsSeen == false)">No</option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Min Length</label>
+                        <input type="number" class="form-control" name="minLength" value="@Model.MinLength" min="0" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Max Length</label>
+                        <input type="number" class="form-control" name="maxLength" value="@Model.MaxLength" min="0" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Min Year</label>
+                        <input type="number" class="form-control" name="minYear" value="@Model.MinYear" min="1800" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <label class="form-label">Max Year</label>
+                        <input type="number" class="form-control" name="maxYear" value="@Model.MaxYear" min="1800" />
+                    </div>
+
+                    <div class="col-md-6">
+                        <label class="form-label">Language</label>
+                        <input type="text" class="form-control" name="language" value="@Model.Language" placeholder="e.g. English" />
+                    </div>
+
+                </div>
+            </div>
+        </div>
 
         <button type="submit" class="btn btn-primary">Apply Filter</button>
-        <a asp-action="Filter" asp-route-listId="@Model.ListId" class="btn btn-secondary ms-2">Clear categories</a>
+
+        <a asp-action="Filter" asp-route-listId="@Model.ListId" class="btn btn-outline-secondary ms-2">
+            Clear all filters
+        </a>
     }
 </form>
 
@@ -82,7 +148,7 @@ else
                     <td style="width:90px;">
                         @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
                         {
-                            <img src="@m.PictureAddress" style="height:80px;" class="img-thumbnail" />
+                            <img src="@m.PictureAddress" style="height:80px;" class="img-thumbnail" alt=""/>
                         }
                     </td>
                     <td>@m.Title</td>
@@ -99,15 +165,28 @@ else
 @section Scripts {
     <script>
         document.addEventListener('DOMContentLoaded', function () {
-            const listSelect = document.getElementById('listSelect');
-            listSelect.addEventListener('change', function () {
-                const val = listSelect.value;
-                const url = new URL(window.location.href);
-                if (val) url.searchParams.set('listId', val);
-                else url.searchParams.delete('listId');
-                url.searchParams.delete('SelectedCategoryIds');
-                window.location.href = url.toString();
+          const listSelect = document.getElementById('listSelect');
+          if (!listSelect) return;
+        
+          listSelect.addEventListener('change', function () {
+            const val = listSelect.value;
+            const url = new URL(window.location.href);
+        
+            url.searchParams.delete('listId');
+            url.searchParams.delete('ListId');
+            url.searchParams.delete('SelectedCategoryIds');
+            url.searchParams.delete('selectedCategoryIds');
+        
+            ['isDeleted','isAvailable','isSeen','minLength','maxLength','language','minYear','maxYear'].forEach(p => {
+              url.searchParams.delete(p);
+              url.searchParams.delete(p.charAt(0).toUpperCase() + p.slice(1));
             });
+        
+            if (val) url.searchParams.set('ListId', val);
+        
+            window.location.href = url.toString();
+          });
         });
     </script>
 }
+

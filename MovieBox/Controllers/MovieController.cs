@@ -118,61 +118,98 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
     #endregion
 
     #region Filter
-    
-        [HttpGet]
-        public async Task<IActionResult> Filter(int? listId, List<int>? selectedCategoryIds)
+
+    [HttpGet]
+    public async Task<IActionResult> Filter(
+        int? listId,
+        List<int>? selectedCategoryIds,
+        bool? isDeleted,
+        bool? isAvailable,
+        bool? isSeen,
+        int? minLength,
+        int? maxLength,
+        string? language,
+        int? minYear,
+        int? maxYear
+    )
+    {
+        selectedCategoryIds ??= new List<int>();
+
+        var vm = new FilterMoviesVm
         {
-            selectedCategoryIds ??= [];
+            ListId = listId,
+            SelectedCategoryIds = selectedCategoryIds,
+            IsDeleted = isDeleted,
+            IsAvailable = isAvailable,
+            IsSeen = isSeen,
+            MinLength = minLength,
+            MaxLength = maxLength,
+            Language = language,
+            MinYear = minYear,
+            MaxYear = maxYear,
+            Lists = await db.Lists.OrderBy(l => l.Name)
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync()
+        };
 
-            var vm = new FilterMoviesVm
+        if (listId is null) return View(vm);
+
+        vm.Categories = await db.Categories.Where(c => c.ListId == listId).OrderBy(c => c.Name)
+            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();
+
+        var moviesQuery = db.Movies.Where(m => m.ListId == listId);
+
+        if (selectedCategoryIds.Count > 0)
+        {
+            var validSelected = await db.Categories
+                .Where(c => c.ListId == listId && selectedCategoryIds.Contains(c.Id))
+                .Select(c => c.Id)
+                .ToListAsync();
+
+            vm.SelectedCategoryIds = validSelected;
+            var selectedCount = validSelected.Count;
+
+            if (selectedCount == 0)
             {
-                ListId = listId,
-                SelectedCategoryIds = selectedCategoryIds,
-                Lists = await db.Lists.OrderBy(l => l.Name)
-                    .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync()
-            };
-
-            if (listId is null) return View(vm);
-
-            vm.Categories = await db.Categories.Where(c => c.ListId == listId).OrderBy(c => c.Name)
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();
-
-            var moviesQuery = db.Movies.Where(m => m.ListId == listId && !m.IsDeleted);
-
-            if (selectedCategoryIds.Count > 0)
-            {
-                var validSelected = await db.Categories.Where(c => c.ListId == listId && selectedCategoryIds.Contains(c.Id))
-                    .Select(c => c.Id).ToListAsync();
-
-                vm.SelectedCategoryIds = validSelected;
-                var selectedCount = validSelected.Count;
-                if (selectedCount == 0)
-                {
-                    vm.Movies = [];
-                    return View(vm);
-                }
-
-                var movieIds = await db.CategorizedItems.Where(ci => validSelected.Contains(ci.CategoryId))
-                    .GroupBy(ci => ci.MovieId).Where(g => g.Select(x => x.CategoryId).Distinct().Count() == selectedCount)
-                    .Select(g => g.Key).ToListAsync();
-
-                moviesQuery = moviesQuery.Where(m => movieIds.Contains(m.Id));
+                vm.Movies = [];
+                return View(vm);
             }
 
-            vm.Movies = await moviesQuery.OrderBy(m => m.Title)
-                .Select(m => new FilterMoviesVm.MovieRow
-                {
-                    Id = m.Id,
-                    Title = m.Title,
-                    Year = m.Year,
-                    IsAvailable = m.IsAvailable,
-                    IsSeen = m.IsSeen,
-                    PictureAddress = m.PictureAddress
-                }).ToListAsync();
+            var movieIds = await db.CategorizedItems.Where(ci => validSelected.Contains(ci.CategoryId))
+                .GroupBy(ci => ci.MovieId).Where(g => g.Select(x => x.CategoryId).Distinct().Count() == selectedCount)
+                .Select(g => g.Key).ToListAsync();
 
-            return View(vm);
+            moviesQuery = moviesQuery.Where(m => movieIds.Contains(m.Id));
         }
-    
+
+        if (isDeleted.HasValue) moviesQuery = moviesQuery.Where(m => m.IsDeleted == isDeleted.Value);
+
+        if (isAvailable.HasValue) moviesQuery = moviesQuery.Where(m => m.IsAvailable == isAvailable.Value);
+
+        if (isSeen.HasValue) moviesQuery = moviesQuery.Where(m => m.IsSeen == isSeen.Value);
+
+        if (minLength.HasValue) moviesQuery = moviesQuery.Where(m => m.Length.HasValue && m.Length.Value >= minLength.Value);
+
+        if (maxLength.HasValue) moviesQuery = moviesQuery.Where(m => m.Length.HasValue && m.Length.Value <= maxLength.Value);
+
+        if (!string.IsNullOrWhiteSpace(language)) moviesQuery = moviesQuery.Where(m => m.Language != null && m.Language == language.Trim());
+
+        if (minYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value >= minYear.Value);
+
+        if (maxYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value <= maxYear.Value);
+
+        vm.Movies = await moviesQuery.OrderBy(m => m.Title).Select(m => new FilterMoviesVm.MovieRow
+            {
+                Id = m.Id,
+                Title = m.Title,
+                Year = m.Year,
+                IsAvailable = m.IsAvailable,
+                IsSeen = m.IsSeen,
+                PictureAddress = m.PictureAddress
+            }).ToListAsync();
+
+        return View(vm);
+    }
+
     #endregion
 
 }

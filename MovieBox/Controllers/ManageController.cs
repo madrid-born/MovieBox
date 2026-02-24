@@ -185,7 +185,7 @@ public class ManageController(ApplicationDbContext db) : Controller
 
         private async Task HydrateCategories(CategoryVm vm)
         {
-            vm.Categories = await db.Categories.OrderBy(c => c.Name).Select(c => new CategoryVm.CategoryRow
+            vm.Categories = await db.Categories.OrderBy(c => c.ListId).ThenBy(c => c.Name).Select(c => new CategoryVm.CategoryRow
                 { Id = c.Id, Title = c.Name, ListId = c.ListId, ListTitle = c.List.Name }).ToListAsync();
         }
     
