@@ -1,8 +1,108 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model MovieBox.ViewModels.HomeDashboardVm
+
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="container mt-5">
+
+    <div class="text-center mb-4">
+        <h1 class="display-5 fw-bold">🎬 MovieBox</h1>
+        <p class="text-muted">Quick shortcuts + per-list statistics</p>
+    </div>
+
+    <div class="row g-4 mb-4">
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-2">🎥 Movie Section</h4>
+                    <p class="text-muted">Add/edit movies, categorize, filter.</p>
+
+                    <div class="d-grid gap-2 mt-3">
+                        <a class="btn btn-primary" asp-controller="Movie" asp-action="Categorize">
+                            ➕ Categorize Movie
+                        </a>
+                        <a class="btn btn-outline-primary" asp-controller="Movie" asp-action="Filter">
+                            🔍 Filter Movies
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h4 class="card-title mb-2">⚙️ Manage Section</h4>
+                    <p class="text-muted">Manage lists and categories.</p>
+
+                    <div class="d-grid gap-2 mt-3">
+                        <a class="btn btn-success" asp-controller="Manage" asp-action="List">
+                            📂 Manage Lists
+                        </a>
+                        <a class="btn btn-outline-success" asp-controller="Manage" asp-action="Category">
+                            🏷 Manage Categories
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Stats Table -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <h4 class="mb-0">📊 List Statistics</h4>
+            </div>
+
+            @if (Model.Lists.Count == 0)
+            {
+                <div class="text-muted">No lists found.</div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover align-middle">
+                        <thead>
+                        <tr>
+                            <th>List</th>
+                            <th class="text-end">Movies</th>
+                            <th class="text-end">Active</th>
+                            <th class="text-end">Deleted</th>
+                            <th class="text-end">Available</th>
+                            <th class="text-end">Seen</th>
+                            <th class="text-end">Categories</th>
+                            <th class="text-end">Languages</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var r in Model.Lists)
+                        {
+                            <tr>
+                                <td class="fw-semibold">
+                                    <a asp-controller="Movie"
+                                       asp-action="Filter"
+                                       asp-route-listId="@r.ListId"
+                                       class="text-decoration-none">
+                                        @r.Name
+                                    </a>
+                                </td>
+                                <td class="text-end">@r.TotalMovies</td>
+                                <td class="text-end">@r.ActiveMovies</td>
+                                <td class="text-end">@r.DeletedMovies</td>
+                                <td class="text-end">@r.AvailableMovies</td>
+                                <td class="text-end">@r.SeenMovies</td>
+                                <td class="text-end">@r.CategoriesCount</td>
+                                <td class="text-end">@r.LanguagesCount</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
 </div>

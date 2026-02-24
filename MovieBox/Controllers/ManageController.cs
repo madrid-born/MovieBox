@@ -89,8 +89,7 @@ public class ManageController(ApplicationDbContext db) : Controller
         
         public async Task<ListVm> HydrateLists(ListVm x)
         {
-            x.Lists = await db.Lists.OrderBy(l => l.Name)
-                .Select(l => new ListVm.ListRow { Id = l.Id, Title = l.Name }).ToListAsync();
+            x.Lists = await db.Lists.OrderBy(l => l.Name).Select(l => new ListVm.ListRow { Id = l.Id, Title = l.Name }).ToListAsync();
             return x;
         }
     
@@ -179,8 +178,8 @@ public class ManageController(ApplicationDbContext db) : Controller
 
         private async Task HydrateListsForCategory(CategoryVm vm)
         {
-            vm.Lists = await db.Lists.OrderBy(l => l.Name)
-                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync();
+            vm.Lists = await db.Lists.OrderBy(l => l.Name).Select(l => new
+                SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync();
         }
 
         private async Task HydrateCategories(CategoryVm vm)

@@ -15,4 +15,12 @@
       <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     </ItemGroup>
 
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Movies\CategorizeMovie.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Lists\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Categories\Create.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Categories\Intersect.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Categories\Items.cshtml" />
+    </ItemGroup>
+
 </Project>

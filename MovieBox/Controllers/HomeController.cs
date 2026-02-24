@@ -1,31 +1,63 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MovieBox.Models;
+using MovieBox.ViewModels;
 
 namespace MovieBox.Controllers;
 
-public class HomeController : Controller
+public class HomeController(ApplicationDbContext db) : Controller
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    public async Task<IActionResult> Index()
     {
-        _logger = logger;
-    }
+        var lists = await db.Lists.Select(l => new { l.Id, l.Name }).OrderBy(l => l.Name).ToListAsync();
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+        var movieStats = await db.Movies.GroupBy(m => m.ListId).Select(g => new
+        {
+            ListId = g.Key,
+            Total = g.Count(),
+            Active = g.Count(m => !m.IsDeleted),
+            Deleted = g.Count(m => m.IsDeleted),
+            Available = g.Count(m => !m.IsDeleted && m.IsAvailable == true),
+            Seen = g.Count(m => !m.IsDeleted && m.IsSeen == true),
+        }).ToListAsync();
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        var categoryStats = await db.Categories.GroupBy(c => c.ListId)
+            .Select(g => new { ListId = g.Key, Categories = g.Count() }).ToListAsync();
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+        var languageStats = await db.Movies.Where(m => !string.IsNullOrWhiteSpace(m.Language))
+            .GroupBy(m => m.ListId).Select(g => new
+            {
+                ListId = g.Key,
+                Languages = g.Select(m => m.Language!.Trim().ToLower()).Distinct().Count()
+            }).ToListAsync();
+
+        var msDict = movieStats.ToDictionary(x => x.ListId);
+        var csDict = categoryStats.ToDictionary(x => x.ListId, x => x.Categories);
+        var lsDict = languageStats.ToDictionary(x => x.ListId, x => x.Languages);
+
+        var vm = new HomeDashboardVm
+        {
+            Lists = lists.Select(l =>
+            {
+                msDict.TryGetValue(l.Id, out var ms);
+                csDict.TryGetValue(l.Id, out var catCount);
+                lsDict.TryGetValue(l.Id, out var langCount);
+
+                return new HomeDashboardVm.ListStatsRow
+                {
+                    ListId = l.Id,
+                    Name = l.Name,
+                    TotalMovies = ms?.Total ?? 0,
+                    ActiveMovies = ms?.Active ?? 0,
+                    DeletedMovies = ms?.Deleted ?? 0,
+                    AvailableMovies = ms?.Available ?? 0,
+                    SeenMovies = ms?.Seen ?? 0,
+                    CategoriesCount = catCount,
+                    LanguagesCount = langCount
+                };
+            }).ToList()
+        };
+
+        return View(vm);
     }
 }

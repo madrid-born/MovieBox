@@ -23,7 +23,6 @@ public class LoadCategory
 {
     [Required, StringLength(100)]
     public string Name { get; init; } = "";
-
     [Required]
     public int? ListId { get; init; }
 }
