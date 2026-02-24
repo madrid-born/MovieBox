@@ -2,7 +2,59 @@
     ViewData["Title"] = "Movie";
 }
 
-<h2>Movie Section</h2>
+<div class="mb-page">
 
-<a class="nav-link text-dark" asp-area="" asp-controller="Movie" asp-action="Categorize">Categorize</a>
-<a class="nav-link text-dark" asp-area="" asp-controller="Movie" asp-action="Filter">Filter</a>
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h2 class="mb-title mb-0">
+                <i class="bi bi-collection-play me-2" style="color: var(--mb-gold);"></i>
+                Movie
+            </h2>
+            <div class="mb-subtitle">Add movies, categorize them, and filter your lists.</div>
+            <div class="mb-divider"></div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-lg-6">
+            <div class="mb-panel h-100">
+                <div class="mb-panel-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="font-size: 34px; color: var(--mb-gold);">
+                            <i class="bi bi-plus-circle"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-title mb-1">Categorize</h4>
+                            <p class="mb-subtitle mb-3">Create or edit a movie, choose list + categories, attach poster.</p>
+
+                            <a class="btn btn-primary" asp-area="" asp-controller="Movie" asp-action="Categorize">
+                                <i class="bi bi-arrow-right-circle me-2"></i>Open Categorize
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="mb-panel h-100">
+                <div class="mb-panel-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="font-size: 34px; color: var(--mb-gold);">
+                            <i class="bi bi-funnel-fill"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-title mb-1">Filter</h4>
+                            <p class="mb-subtitle mb-3">Advanced filtering by list, categories intersection, and flags.</p>
+
+                            <a class="btn btn-primary" asp-area="" asp-controller="Movie" asp-action="Filter">
+                                <i class="bi bi-arrow-right-circle me-2"></i>Open Filter
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

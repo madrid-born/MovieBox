@@ -4,45 +4,66 @@
     ViewData["Title"] = "Home";
 }
 
-<div class="container mt-5">
+<div class="mb-page">
 
-    <div class="text-center mb-4">
-        <h1 class="display-5 fw-bold">🎬 MovieBox</h1>
-        <p class="text-muted">Quick shortcuts + per-list statistics</p>
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h1 class="mb-title">🎬 MovieBox</h1>
+            <div class="mb-subtitle">Quick shortcuts + per-list statistics</div>
+            <div class="mb-divider"></div>
+        </div>
+
+        <div class="d-flex gap-2 flex-wrap">
+            <a class="btn btn-primary" asp-controller="Movie" asp-action="Categorize">
+                <i class="bi bi-plus-circle me-2"></i>Categorize
+            </a>
+            <a class="btn btn-outline-primary" asp-controller="Movie" asp-action="Filter">
+                <i class="bi bi-search me-2"></i>Filter
+            </a>
+            <a class="btn btn-outline-secondary" asp-controller="Manage" asp-action="Index">
+                <i class="bi bi-sliders me-2"></i>Manage
+            </a>
+        </div>
     </div>
 
-    <div class="row g-4 mb-4">
+    <div class="row g-4 mt-2">
 
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h4 class="card-title mb-2">🎥 Movie Section</h4>
-                    <p class="text-muted">Add/edit movies, categorize, filter.</p>
+        <div class="col-lg-6">
+            <div class="mb-panel h-100">
+                <div class="mb-panel-body text-center">
+                    <div class="mb-2" style="font-size:34px;color: var(--mb-gold);">
+                        <i class="bi bi-collection-play"></i>
+                    </div>
+                    <h4 class="mb-title mb-1">Movie Section</h4>
+                    <p class="mb-subtitle mb-0">Add/edit movies, categorize, and filter with precision.</p>
 
-                    <div class="d-grid gap-2 mt-3">
+                    <div class="d-grid gap-2 mt-4">
                         <a class="btn btn-primary" asp-controller="Movie" asp-action="Categorize">
-                            ➕ Categorize Movie
+                            <i class="bi bi-plus-circle me-2"></i>➕ Categorize Movie
                         </a>
                         <a class="btn btn-outline-primary" asp-controller="Movie" asp-action="Filter">
-                            🔍 Filter Movies
+                            <i class="bi bi-funnel me-2"></i>🔍 Filter Movies
                         </a>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card shadow-sm h-100">
-                <div class="card-body text-center">
-                    <h4 class="card-title mb-2">⚙️ Manage Section</h4>
-                    <p class="text-muted">Manage lists and categories.</p>
+        <div class="col-lg-6">
+            <div class="mb-panel h-100">
+                <div class="mb-panel-body text-center">
+                    <div class="mb-2" style="font-size:34px;color: var(--mb-gold);">
+                        <i class="bi bi-sliders2"></i>
+                    </div>
+                    <h4 class="mb-title mb-1">Manage Section</h4>
+                    <p class="mb-subtitle mb-0">Create lists and categories to keep everything clean.</p>
 
-                    <div class="d-grid gap-2 mt-3">
-                        <a class="btn btn-success" asp-controller="Manage" asp-action="List">
-                            📂 Manage Lists
+                    <div class="d-grid gap-2 mt-4">
+                        <a class="btn btn-primary" asp-controller="Manage" asp-action="List">
+                            <i class="bi bi-folder2-open me-2"></i>📂 Manage Lists
                         </a>
-                        <a class="btn btn-outline-success" asp-controller="Manage" asp-action="Category">
-                            🏷 Manage Categories
+                        <a class="btn btn-outline-primary" asp-controller="Manage" asp-action="Category">
+                            <i class="bi bi-tags me-2"></i>🏷 Manage Categories
                         </a>
                     </div>
                 </div>
@@ -51,13 +72,18 @@
 
     </div>
 
-    <!-- Stats Table -->
-    <div class="card shadow-sm">
-        <div class="card-body">
-            <div class="d-flex align-items-center justify-content-between mb-3">
-                <h4 class="mb-0">📊 List Statistics</h4>
+    <div class="mb-panel mt-4">
+        <div class="mb-panel-header">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                <div>
+                    <h4 class="mb-title mb-0">📊 List Statistics</h4>
+                    <div class="mb-subtitle">A quick snapshot of your library health.</div>
+                </div>
             </div>
+            <div class="mb-divider"></div>
+        </div>
 
+        <div class="mb-panel-body">
             @if (Model.Lists.Count == 0)
             {
                 <div class="text-muted">No lists found.</div>
@@ -105,4 +131,5 @@
             }
         </div>
     </div>
+
 </div>

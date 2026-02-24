@@ -4,49 +4,386 @@
     <meta charset="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>@ViewData["Title"] - MovieBox</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css"/>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true"/>
     <link rel="stylesheet" href="~/MovieBox.styles.css" asp-append-version="true"/>
+
+    <!-- Theme add-ons (frontend only) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        :root{
+            --mb-bg0:#07080b;
+            --mb-bg1:#0c0f16;
+            --mb-panel: rgba(17, 20, 30, .62);
+            --mb-panel2: rgba(17, 20, 30, .78);
+            --mb-border: rgba(245, 197, 66, .22);
+            --mb-border2: rgba(255,255,255,.10);
+            --mb-text: rgba(255,255,255,.92);
+            --mb-muted: rgba(255,255,255,.62);
+            --mb-gold:#f5c542;
+            --mb-gold2:#ffdf7a;
+            --mb-shadow: 0 18px 60px rgba(0,0,0,.45);
+            --mb-radius: 18px;
+        }
+
+        html, body 
+        {
+            height: 100%;
+            margin: 0;
+        }
+        
+        body{
+            font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+            color: var(--mb-text);
+            background:
+                radial-gradient(1200px 700px at 15% 10%, rgba(245,197,66,.18), transparent 60%),
+                radial-gradient(900px 650px at 80% 20%, rgba(80,130,255,.14), transparent 55%),
+                linear-gradient(180deg, var(--mb-bg0), var(--mb-bg1));
+        }
+
+        /* Layout shell */
+        .mb-shell {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Navbar (glass + gold accents) */
+        .mb-nav{
+            background: rgba(10, 12, 18, .55) !important;
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255,255,255,.08) !important;
+        }
+        .mb-brand{
+            display:flex;
+            align-items:center;
+            gap:.6rem;
+            font-weight: 800;
+            letter-spacing:.2px;
+        }
+        .mb-badge{
+            width: 34px;
+            height: 34px;
+            display:inline-flex;
+            align-items:center;
+            justify-content:center;
+            border-radius: 10px;
+            background: rgba(245,197,66,.14);
+            border: 1px solid rgba(245,197,66,.28);
+            box-shadow: 0 10px 25px rgba(245,197,66,.10);
+            color: var(--mb-gold2);
+        }
+
+        .navbar .nav-link{
+            color: rgba(255,255,255,.78) !important;
+            font-weight: 600;
+            border-radius: 12px;
+            padding: .55rem .85rem !important;
+            transition: all .15s ease;
+        }
+        .navbar .nav-link:hover{
+            color: rgba(255,255,255,.95) !important;
+            background: rgba(255,255,255,.06);
+        }
+        .navbar .nav-link.active{
+            background: rgba(245,197,66,.12);
+            border: 1px solid rgba(245,197,66,.22);
+            color: rgba(255,255,255,.95) !important;
+        }
+
+        /* Main container */
+        .mb-main{
+            flex:1;
+        }
+
+        /* Reusable UI */
+        .mb-panel{
+            background: var(--mb-panel);
+            border: 1px solid var(--mb-border2);
+            border-radius: var(--mb-radius);
+            box-shadow: var(--mb-shadow);
+            backdrop-filter: blur(10px);
+        }
+        .mb-panel--gold{
+            border-color: var(--mb-border);
+        }
+        .mb-panel-header{
+            padding: 18px 18px 0;
+        }
+        .mb-panel-body{
+            padding: 18px;
+        }
+
+        .mb-title{
+            font-weight: 800;
+            letter-spacing: .2px;
+        }
+        .mb-subtitle{
+            color: var(--mb-muted);
+        }
+
+        /* Buttons */
+        .btn-primary{
+            background: linear-gradient(180deg, rgba(245,197,66,.98), rgba(214,160,33,.98));
+            border: none;
+            color: #1a1a1a;
+            font-weight: 800;
+            box-shadow: 0 14px 28px rgba(245,197,66,.18);
+        }
+        .btn-primary:hover{
+            filter: brightness(1.02);
+            transform: translateY(-1px);
+        }
+        .btn-outline-secondary{
+            border-color: rgba(255,255,255,.22);
+            color: rgba(255,255,255,.85);
+        }
+        .btn-outline-secondary:hover{
+            background: rgba(255,255,255,.06);
+            border-color: rgba(255,255,255,.28);
+            color: rgba(255,255,255,.95);
+        }
+        .btn-outline-primary{
+            border-color: rgba(245,197,66,.45);
+            color: rgba(255,255,255,.92);
+        }
+        .btn-outline-primary:hover{
+            background: rgba(245,197,66,.12);
+            border-color: rgba(245,197,66,.55);
+            color: rgba(255,255,255,.98);
+        }
+
+        /* Forms */
+        .form-control, .form-select{
+            background: rgba(10, 12, 18, .55);
+            color: rgba(255,255,255,.92);
+            border: 1px solid rgba(255,255,255,.14);
+            border-radius: 14px;
+        }
+        .form-control:focus, .form-select:focus{
+            border-color: rgba(245,197,66,.55);
+            box-shadow: 0 0 0 .2rem rgba(245,197,66,.14);
+            background: rgba(10, 12, 18, .65);
+            color: rgba(255,255,255,.98);
+        }
+        .form-label{
+            color: rgba(255,255,255,.78);
+            font-weight: 700;
+        }
+        .form-check-input{
+            background-color: rgba(10, 12, 18, .55);
+            border-color: rgba(255,255,255,.22);
+        }
+        .form-check-input:checked{
+            background-color: var(--mb-gold);
+            border-color: rgba(245,197,66,.75);
+        }
+        .text-muted{ color: var(--mb-muted) !important; }
+
+        /* Tables */
+        .table{
+            --bs-table-bg: transparent;
+            --bs-table-color: rgba(255,255,255,.90);
+            --bs-table-striped-color: rgba(255,255,255,.90);
+            --bs-table-striped-bg: rgba(255,255,255,.03);
+            --bs-table-hover-color: rgba(255,255,255,.95);
+            --bs-table-hover-bg: rgba(245,197,66,.06);
+            border-color: rgba(255,255,255,.08);
+            color: rgba(255,255,255,.95);
+        }
+        .table thead th{
+            color: rgba(255,255,255,.78);
+            font-weight: 800;
+            border-bottom: 1px solid rgba(255,255,255,.10);
+        }
+        .img-thumbnail{
+            background: rgba(10, 12, 18, .35);
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 14px;
+        }
+
+        /* Footer */
+        footer.footer{
+            margin-top: auto;
+            background: rgba(10, 12, 18, .35);
+            border-top: 1px solid rgba(255,255,255,.08) !important;
+        }
+        footer.footer, footer.footer a{
+            color: rgba(255,255,255,.62) !important;
+        }
+
+        /* Small helper to make simple pages look “designed” */
+        .mb-page{
+            /*max-width: 1100px;*/
+            margin: 0 auto;
+        }
+        .mb-hero{
+            display:flex;
+            align-items:flex-end;
+            justify-content:space-between;
+            gap: 18px;
+            padding: 22px 22px;
+        }
+        .mb-hero h1, .mb-hero h2{
+            margin: 0;
+        }
+        .mb-divider{
+            height: 1px;
+            background: rgba(255,255,255,.10);
+            margin: 14px 0 0;
+        }
+        /* ===== Movie Grid Layout ===== */
+
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 28px;
+        }
+
+        .movie-card {
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .movie-link {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+        }
+
+        .poster-wrapper {
+            border-radius: 16px;
+            overflow: hidden;
+            background: #111;
+            aspect-ratio: 2 / 3;
+            box-shadow: 0 12px 28px rgba(0,0,0,.4);
+            transition: transform .25s ease, box-shadow .25s ease;
+        }
+
+        .poster-wrapper img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .poster-placeholder {
+            aspect-ratio: 2 / 3;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #1a1a1a;
+            border-radius: 16px;
+            color: #888;
+            font-weight: 600;
+        }
+
+        .movie-title {
+            margin-top: 12px;
+            font-weight: 700;
+            font-size: 2rem;
+            text-align: center;
+            color: rgba(255,255,255,.95);
+            line-height: 1.3;
+            transition: color .2s ease;
+        }
+
+        /* Hover effect like your screenshot */
+        .movie-card:hover .poster-wrapper {
+            transform: translateY(-6px);
+            box-shadow: 0 20px 40px rgba(0,0,0,.6);
+        }
+
+        .movie-card:hover .movie-title {
+            color: var(--mb-gold);
+        }
+        /* ===== Extended Ultra-Wide Breakpoints ===== */
+
+        @@media (min-width: 1600px) {
+        .container, .container-sm, .container-md,
+        .container-lg, .container-xl, .container-xxl {
+            max-width: 1500px;
+        }
+        }
+
+        @@media (min-width: 1800px) {
+        .container, .container-sm, .container-md,
+        .container-lg, .container-xl, .container-xxl {
+            max-width: 1700px;
+        }
+        }
+
+        @@media (min-width: 2000px) {
+        .container, .container-sm, .container-md,
+        .container-lg, .container-xl, .container-xxl {
+            max-width: 1850px;
+        }
+        }
+    </style>
 </head>
+
 <body>
+<div class="mb-shell">
 <header>
-    <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+    <nav class="navbar navbar-expand-sm navbar-toggleable-sm mb-nav mb-3">
         <div class="container-fluid">
-            <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">MovieBox</a>
+            <a class="navbar-brand mb-brand text-decoration-none" asp-area="" asp-controller="Home" asp-action="Index">
+                <span class="mb-badge"><i class="bi bi-film"></i></span>
+                <span>MovieBox</span>
+            </a>
+
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                     aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                <ul class="navbar-nav flex-grow-1">
+                <ul class="navbar-nav flex-grow-1 gap-1">
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                        <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index"><i class="bi bi-house-door me-2"></i>Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Movie" asp-action="Index">Movie</a>
+                        <a class="nav-link" asp-area="" asp-controller="Movie" asp-action="Index"><i class="bi bi-collection-play me-2"></i>Movie</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link text-dark" asp-area="" asp-controller="Manage" asp-action="Index">Manage</a>
+                        <a class="nav-link" asp-area="" asp-controller="Manage" asp-action="Index"><i class="bi bi-sliders me-2"></i>Manage</a>
                     </li>
                 </ul>
+
+                <div class="d-none d-md-flex align-items-center gap-2 text-muted">
+                    <i class="bi bi-stars" style="color: var(--mb-gold);"></i>
+                    <span style="font-weight:700;">Cinematic</span>
+                </div>
             </div>
         </div>
     </nav>
 </header>
-<div class="container">
+
+<div class="container mb-main">
     <main role="main" class="pb-3">
         @RenderBody()
     </main>
 </div>
+@* *@
+@* <footer class="border-top footer text-muted"> *@
+@*     <div class="container py-3 d-flex flex-wrap justify-content-between align-items-center gap-2"> *@
+@*         <div> *@
+@*             &copy; 2026 - MovieBox - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a> *@
+@*         </div> *@
+@*         <div class="text-muted"> *@
+@*             <i class="bi bi-camera-reels me-1"></i> Keep it organized. *@
+@*         </div> *@
+@*     </div> *@
+@* </footer> *@
 
-<footer class="border-top footer text-muted">
-    <div class="container">
-        &copy; 2026 - MovieBox - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-    </div>
-</footer>
 <script src="~/lib/jquery/dist/jquery.min.js"></script>
 <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 <script src="~/js/site.js" asp-append-version="true"></script>
 @await RenderSectionAsync("Scripts", required: false)
+</div>
 </body>
 </html>

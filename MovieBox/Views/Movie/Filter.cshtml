@@ -4,178 +4,259 @@
     ViewData["Title"] = "Filter Movies";
 }
 
-<h2>Filter Movies</h2>
+<div class="mb-page">
 
-<form asp-action="Filter" method="get">
-    <div class="mb-3">
-        <label class="form-label">List</label>
-        <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
-            <option value="">-- Select a list --</option>
-        </select>
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h2 class="mb-title mb-0"><i class="bi bi-funnel-fill me-2" style="color: var(--mb-gold);"></i>Filter Movies</h2>
+            <div class="mb-subtitle">Pick a list, choose category intersection, then refine with advanced filters.</div>
+            <div class="mb-divider"></div>
+        </div>
+        <div class="d-none d-md-flex align-items-center gap-2 text-muted">
+            <i class="bi bi-search" style="color: var(--mb-gold);"></i>
+            <span style="font-weight:700;">Advanced search</span>
+        </div>
     </div>
 
-    @if (Model.ListId != null)
-    {
-        <div class="mb-3">
-            <label class="form-label">Categories (intersection)</label>
+    <div class="mb-panel mt-3">
+        <div class="mb-panel-body">
 
-            <div class="border rounded p-2">
-                @if (Model.Categories.Count > 0)
-                {
-                    foreach (var c in Model.Categories)
-                    {
-                        var cid = int.Parse(c.Value!);
-                        var isChecked = Model.SelectedCategoryIds.Contains(cid);
-
-                        <div class="form-check">
-                            <input class="form-check-input"
-                                   type="checkbox"
-                                   name="SelectedCategoryIds"
-                                   value="@cid"
-                                   @(isChecked ? "checked" : "") />
-                            <label class="form-check-label">@c.Text</label>
-                        </div>
-                    }
-                }
-                else
-                {
-                    <div class="text-muted">No categories found for this list.</div>
-                }
-            </div>
-        </div>
-        
-        <div class="mb-3 mt-4">
-            <h5>Filters</h5>
-
-            <div class="border rounded p-3">
-
-                <div class="row g-3">
-
-                    <div class="col-md-4">
-                        <label class="form-label">Deleted</label>
-                        <select class="form-select" name="isDeleted">
-                            <option value="" selected="@(Model.IsDeleted == null)">Any</option>
-                            <option value="false" selected="@(Model.IsDeleted == false)">Not deleted</option>
-                            <option value="true" selected="@(Model.IsDeleted == true)">Deleted</option>
+            <form asp-action="Filter" method="get">
+                <div class="row g-3 align-items-end">
+                    <div class="col-lg-5">
+                        <label class="form-label">List</label>
+                        <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
+                            <option value="">-- Select a list --</option>
                         </select>
                     </div>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Available</label>
-                        <select class="form-select" name="isAvailable">
-                            <option value="" selected="@(Model.IsAvailable == null)">Any</option>
-                            <option value="true" selected="@(Model.IsAvailable == true)">Yes</option>
-                            <option value="false" selected="@(Model.IsAvailable == false)">No</option>
-                        </select>
-                    </div>
+                    <div class="col-lg-7 text-lg-end">
+                        <div class="d-flex gap-2 justify-content-lg-end flex-wrap">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check2-circle me-2"></i>Apply Filter
+                            </button>
 
-                    <div class="col-md-4">
-                        <label class="form-label">Seen</label>
-                        <select class="form-select" name="isSeen">
-                            <option value="" selected="@(Model.IsSeen == null)">Any</option>
-                            <option value="true" selected="@(Model.IsSeen == true)">Yes</option>
-                            <option value="false" selected="@(Model.IsSeen == false)">No</option>
-                        </select>
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Min Length</label>
-                        <input type="number" class="form-control" name="minLength" value="@Model.MinLength" min="0" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Max Length</label>
-                        <input type="number" class="form-control" name="maxLength" value="@Model.MaxLength" min="0" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Min Year</label>
-                        <input type="number" class="form-control" name="minYear" value="@Model.MinYear" min="1800" />
-                    </div>
-
-                    <div class="col-md-3">
-                        <label class="form-label">Max Year</label>
-                        <input type="number" class="form-control" name="maxYear" value="@Model.MaxYear" min="1800" />
-                    </div>
-
-                    <div class="col-md-6">
-                        <div class="col-md-6">
-                            <label class="form-label">Language</label>
-                            <select class="form-select" name="language">
-                                <option value="">Any</option>
-                                @foreach (var lang in Model.Languages)
-                                {
-                                    <option value="@lang.Value" selected="@lang.Selected">
-                                        @lang.Text
-                                    </option>
-                                }
-                            </select>
+                            <a asp-action="Filter" asp-route-listId="@Model.ListId" class="btn btn-outline-secondary">
+                                <i class="bi bi-x-circle me-2"></i>Clear all filters
+                            </a>
                         </div>
                     </div>
                 </div>
-            </div>
+
+                @if (Model.ListId != null)
+                {
+                    <div class="mt-4">
+                        <div class="row g-4">
+                            <div class="col-xl-4">
+                                <div class="p-3 mb-panel mb-panel--gold" style="box-shadow:none;">
+                                    <div class="d-flex align-items-center justify-content-between">
+                                        <div>
+                                            <div class="mb-title" style="font-size: 1.05rem;">
+                                                <i class="bi bi-tags-fill me-2" style="color: var(--mb-gold);"></i>
+                                                Categories (intersection)
+                                            </div>
+                                            <div class="mb-subtitle">Movies must match all selected categories.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3" style="max-height: 240px; overflow:auto; padding-right: 6px;">
+                                        <div class="border rounded p-2" style="border-color: rgba(255,255,255,.10) !important; background: rgba(0,0,0,.15);">
+                                            @if (Model.Categories.Count > 0)
+                                            {
+                                                foreach (var c in Model.Categories)
+                                                {
+                                                    var cid = int.Parse(c.Value!);
+                                                    var isChecked = Model.SelectedCategoryIds.Contains(cid);
+
+                                                    <div class="form-check py-1">
+                                                        <input class="form-check-input"
+                                                               type="checkbox"
+                                                               name="SelectedCategoryIds"
+                                                               value="@cid"
+                                                               @(isChecked ? "checked" : "") />
+                                                        <label class="form-check-label">@c.Text</label>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="text-muted">No categories found for this list.</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-xl-8">
+                                <div class="p-3 mb-panel" style="box-shadow:none;">
+                                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                                        <div>
+                                            <div class="mb-title" style="font-size: 1.05rem;">
+                                                <i class="bi bi-sliders2 me-2" style="color: var(--mb-gold);"></i>
+                                                Filters
+                                            </div>
+                                            <div class="mb-subtitle">Fine tune your result set.</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mt-3">
+                                        <div class="border rounded p-3" style="border-color: rgba(255,255,255,.10) !important; background: rgba(0,0,0,.10);">
+                                            <div class="row g-3">
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Deleted</label>
+                                                    <select class="form-select" name="isDeleted">
+                                                        <option value="" selected="@(Model.IsDeleted == null)">Any</option>
+                                                        <option value="false" selected="@(Model.IsDeleted == false)">Not deleted</option>
+                                                        <option value="true" selected="@(Model.IsDeleted == true)">Deleted</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Available</label>
+                                                    <select class="form-select" name="isAvailable">
+                                                        <option value="" selected="@(Model.IsAvailable == null)">Any</option>
+                                                        <option value="true" selected="@(Model.IsAvailable == true)">Yes</option>
+                                                        <option value="false" selected="@(Model.IsAvailable == false)">No</option>
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Seen</label>
+                                                    <select class="form-select" name="isSeen">
+                                                        <option value="" selected="@(Model.IsSeen == null)">Any</option>
+                                                        <option value="true" selected="@(Model.IsSeen == true)">Yes</option>
+                                                        <option value="false" selected="@(Model.IsSeen == false)">No</option>
+                                                    </select>
+                                                </div>
+                                                
+                                                
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Language</label>
+                                                    <select class="form-select" name="language">
+                                                        <option value="">Any</option>
+                                                        @foreach (var lang in Model.Languages)
+                                                        {
+                                                            <option value="@lang.Value" selected="@lang.Selected">
+                                                                @lang.Text
+                                                            </option>
+                                                        }
+                                                    </select>
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Min Length</label>
+                                                    <input type="number" class="form-control" name="minLength" value="@Model.MinLength" min="0" />
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Max Length</label>
+                                                    <input type="number" class="form-control" name="maxLength" value="@Model.MaxLength" min="0" />
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Min Year</label>
+                                                    <input type="number" class="form-control" name="minYear" value="@Model.MinYear" min="1800" />
+                                                </div>
+
+                                                <div class="col-md-3">
+                                                    <label class="form-label">Max Year</label>
+                                                    <input type="number" class="form-control" name="maxYear" value="@Model.MaxYear" min="1800" />
+                                                </div>
+
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex gap-2 flex-wrap mt-3">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="bi bi-check2-circle me-2"></i>Apply Filter
+                                            </button>
+
+                                            <a asp-action="Filter" asp-route-listId="@Model.ListId" class="btn btn-outline-secondary ms-2">
+                                                <i class="bi bi-x-circle me-2"></i>Clear all filters
+                                            </a>
+                                        </div>
+
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </form>
+
         </div>
+    </div>
 
-        <button type="submit" class="btn btn-primary">Apply Filter</button>
+    <div class="mt-4">
+        @if (Model.ListId == null)
+        {
+            <div class="mb-panel">
+                <div class="mb-panel-body text-center">
+                    <div style="font-size: 34px; color: var(--mb-gold);"><i class="bi bi-arrow-up-circle"></i></div>
+                    <div class="mb-title mt-2">Select a list to start filtering.</div>
+                    <div class="mb-subtitle">Once a list is selected, categories and advanced filters will appear.</div>
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="mb-panel">
+                <div class="mb-panel-header">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div>
+                            <h4 class="mb-title mb-0">Results (@Model.Movies.Count)</h4>
+                            <div class="mb-subtitle">Click a title to edit/categorize that movie.</div>
+                        </div>
+                    </div>
+                    <div class="mb-divider"></div>
+                </div>
 
-        <a asp-action="Filter" asp-route-listId="@Model.ListId" class="btn btn-outline-secondary ms-2">
-            Clear all filters
-        </a>
-    }
-</form>
+                <div class="mb-panel-body">
 
-<hr />
+                    @if (Model.Movies.Count == 0)
+                    {
+                        <div class="text-muted">No movies match the selected categories.</div>
+                    }
+                    else
+                    {
+                        <div class="movie-grid">
+                            @foreach (var m in Model.Movies)
+                            {
+                                <div class="movie-card">
+                                    <a asp-action="Categorize"
+                                       asp-route-listId="@Model.ListId"
+                                       asp-route-movieId="@m.Id"
+                                       class="movie-link">
 
-@if (Model.ListId == null)
-{
-    <div class="text-muted">Select a list to start filtering.</div>
-}
-else
-{
-    <h4>Results (@Model.Movies.Count)</h4>
+                                        @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
+                                        {
+                                            <div class="poster-wrapper">
+                                                <img src="@m.PictureAddress" alt="@m.Title" />
+                                            </div>
+                                        }
+                                        else
+                                        {
+                                            <div class="poster-placeholder">
+                                                No Image
+                                            </div>
+                                        }
 
-    @if (Model.Movies.Count == 0)
-    {
-        <div class="text-muted">No movies match the selected categories.</div>
-    }
-    else
-    {
-        <table class="table table-striped table-hover align-middle">
-            <thead>
-            <tr>
-                <th>Poster</th>
-                <th>Title</th>
-                <th>Year</th>
-                <th>Available</th>
-                <th>Seen</th>
-            </tr>
-            </thead>
-            <tbody>
-            @foreach (var m in Model.Movies)
-            {
-                <tr>
-                    <td style="width:90px;">
-                        @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
-                        {
-                            <img src="@m.PictureAddress" style="height:80px;" class="img-thumbnail" alt=""/>
-                        }
-                    </td>
-                    <td>
-                        <a asp-action="Categorize"
-                           asp-route-listId="@Model.ListId"
-                           asp-route-movieId="@m.Id">
-                            @m.Title
-                        </a>
-                    </td>
-                    <td>@m.Year</td>
-                    <td>@(m.IsAvailable == true ? "Yes" : "No")</td>
-                    <td>@(m.IsSeen == true ? "Yes" : "No")</td>
-                </tr>
-            }
-            </tbody>
-        </table>
-    }
-}
+                                        <div class="movie-title">
+                                            @m.Title
+                                        </div>
+
+                                    </a>
+                                </div>
+                            }
+                        </div>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+
+</div>
 
 @section Scripts {
     <script>
@@ -204,4 +285,3 @@ else
         });
     </script>
 }
-

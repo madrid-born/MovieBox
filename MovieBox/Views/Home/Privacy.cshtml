@@ -1,6 +1,42 @@
 ﻿@{
     ViewData["Title"] = "Privacy Policy";
 }
-<h1>@ViewData["Title"]</h1>
 
-<p>Use this page to detail your site's privacy policy.</p>
+<div class="mb-page">
+
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h2 class="mb-title mb-0">
+                <i class="bi bi-shield-lock-fill me-2" style="color: var(--mb-gold);"></i>
+                @ViewData["Title"]
+            </h2>
+            <div class="mb-subtitle">How we treat and protect your data.</div>
+            <div class="mb-divider"></div>
+        </div>
+    </div>
+
+    <div class="mb-panel mt-3">
+        <div class="mb-panel-body">
+            <p class="mb-subtitle mb-3">
+                Use this page to detail your site's privacy policy.
+            </p>
+
+            <div class="row g-3">
+                <div class="col-lg-6">
+                    <div class="p-3 rounded" style="background: rgba(0,0,0,.12); border: 1px solid rgba(255,255,255,.08);">
+                        <div class="mb-title mb-1"><i class="bi bi-database-lock me-2" style="color: var(--mb-gold);"></i>Data</div>
+                        <div class="mb-subtitle">Explain what you store (movies, lists, categories), and why.</div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="p-3 rounded" style="background: rgba(0,0,0,.12); border: 1px solid rgba(255,255,255,.08);">
+                        <div class="mb-title mb-1"><i class="bi bi-eye-slash me-2" style="color: var(--mb-gold);"></i>Visibility</div>
+                        <div class="mb-subtitle">Clarify who can see it (local-only, account-only, admin-only, etc.).</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>

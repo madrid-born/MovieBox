@@ -2,7 +2,59 @@
     ViewData["Title"] = "Manage";
 }
 
-<h2>Manage Section</h2>
+<div class="mb-page">
 
-<a class="nav-link text-dark" asp-area="" asp-controller="Manage" asp-action="List">List</a>
-<a class="nav-link text-dark" asp-area="" asp-controller="Manage" asp-action="Category">Categories</a>
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h2 class="mb-title mb-0">
+                <i class="bi bi-sliders2 me-2" style="color: var(--mb-gold);"></i>
+                Manage
+            </h2>
+            <div class="mb-subtitle">Create lists and categories to keep your library organized.</div>
+            <div class="mb-divider"></div>
+        </div>
+    </div>
+
+    <div class="row g-4 mt-2">
+        <div class="col-lg-6">
+            <div class="mb-panel h-100">
+                <div class="mb-panel-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="font-size: 34px; color: var(--mb-gold);">
+                            <i class="bi bi-folder2-open"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-title mb-1">Lists</h4>
+                            <p class="mb-subtitle mb-3">Create and edit lists (e.g. “Watchlist”, “Favorites”, “Archive”).</p>
+
+                            <a class="btn btn-primary" asp-area="" asp-controller="Manage" asp-action="List">
+                                <i class="bi bi-arrow-right-circle me-2"></i>Go to List Manager
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6">
+            <div class="mb-panel h-100">
+                <div class="mb-panel-body">
+                    <div class="d-flex align-items-start gap-3">
+                        <div style="font-size: 34px; color: var(--mb-gold);">
+                            <i class="bi bi-tags"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h4 class="mb-title mb-1">Categories</h4>
+                            <p class="mb-subtitle mb-3">Create categories per list (e.g. “Action”, “Drama”, “Anime”).</p>
+
+                            <a class="btn btn-primary" asp-area="" asp-controller="Manage" asp-action="Category">
+                                <i class="bi bi-arrow-right-circle me-2"></i>Go to Category Manager
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>

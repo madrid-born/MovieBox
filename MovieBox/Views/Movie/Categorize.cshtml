@@ -4,141 +4,176 @@
 ViewData["Title"] = "Categorize Movie";
 }
 
-<h2>@(Model.Id.HasValue ? "Edit Movie" : "Categorize Movie")</h2>
+<div class="mb-page">
 
-@if (TempData["Success"] is string msg)
-{
-<div class="alert alert-success">@msg</div>
-}
-
-<form asp-action="Categorize" method="post" enctype="multipart/form-data">
-    @Html.AntiForgeryToken()
-    <input type="hidden" asp-for="Id" />
-    
-    <div class="mb-3">
-        <label asp-for="ListId" class="form-label">List</label>
-        <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
-            <option value="">-- Select a list --</option>
-        </select>
-        <span asp-validation-for="ListId" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Title" class="form-label">Title</label>
-        <input asp-for="Title" class="form-control" />
-        <span asp-validation-for="Title" class="text-danger"></span>
-    </div>
-
-    <div class="row">
-        <div class="col-md-3 mb-3">
-            <label asp-for="Year" class="form-label">Year</label>
-            <input asp-for="Year" class="form-control" type="number" />
-            <span asp-validation-for="Year" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-3 mb-3">
-            <label asp-for="Length" class="form-label">Length (min)</label>
-            <input asp-for="Length" class="form-control" type="number" />
-            <span asp-validation-for="Length" class="text-danger"></span>
-        </div>
-
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Language</label>
-
-            <select class="form-select" id="languageSelect" asp-for="Language">
-                <option value="">-- Select language --</option>
-
-                @foreach (var lang in Model.Languages)
-                {
-                    // mark selected case-insensitively
-                    var selected = !string.IsNullOrWhiteSpace(Model.Language)
-                                   && lang.Value != null
-                                   && lang.Value.Equals(Model.Language, StringComparison.OrdinalIgnoreCase);
-
-                    <option value="@lang.Value" selected="@(selected ? "selected" : null)">@lang.Text</option>
-                }
-
-                <option value="__other__">Other...</option>
-            </select>
-
-            <div class="mt-2" id="newLanguageWrap" style="display:none;">
-                <input asp-for="NewLanguage" class="form-control" placeholder="Enter new language..." />
-                <span asp-validation-for="NewLanguage" class="text-danger"></span>
-            </div>
-
-            <span asp-validation-for="Language" class="text-danger"></span>
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h2 class="mb-title mb-0">
+                <i class="bi bi-pencil-square me-2" style="color: var(--mb-gold);"></i>
+                @(Model.Id.HasValue ? "Edit Movie" : "Categorize Movie")
+            </h2>
+            <div class="mb-subtitle">Add details, select categories, and attach a poster.</div>
+            <div class="mb-divider"></div>
         </div>
     </div>
 
-    <div class="mb-3">
-        <label asp-for="Description" class="form-label">Description</label>
-        <textarea asp-for="Description" class="form-control" rows="3"></textarea>
-        <span asp-validation-for="Description" class="text-danger"></span>
-    </div>
-
-    <div class="row">
-        <div class="col-md-3 mb-3 form-check">
-            <input asp-for="IsAvailable" class="form-check-input" id="isAvailableChk" />
-            <label asp-for="IsAvailable" class="form-check-label">Available</label>
-        </div>
-
-        <div class="col-md-3 mb-3 form-check">
-            <input asp-for="IsSeen" class="form-check-input" />
-            <label asp-for="IsSeen" class="form-check-label">Seen</label>
-        </div>
-    </div>
-
-    <div class="mb-3" id="localAddressWrap" style="display:none;">
-        <label asp-for="LocalAddress" class="form-label">Local Address</label>
-        <input asp-for="LocalAddress" class="form-control" />
-        <span asp-validation-for="LocalAddress" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label class="form-label">Categories</label>
-        <div class="border rounded p-2">
-            @if (Model.Categories?.Count > 0)
-            {
-            foreach (var c in Model.Categories)
-            {
-            var cid = int.Parse(c.Value!);
-            var isChecked = Model.SelectedCategoryIds.Contains(cid);
-
-            <div class="form-check">
-                <input class="form-check-input"
-                       type="checkbox"
-                       name="SelectedCategoryIds"
-                       value="@cid"
-                       @(isChecked ? "checked" : "") />
-                <label class="form-check-label">@c.Text</label>
-            </div>
-            }
-            }
-            else
-            {
-            <div class="text-muted">No categories found for this list.</div>
-            }
-        </div>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="PictureFile" class="form-label">Picture</label>
-        <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" />
-        <span asp-validation-for="PictureFile" class="text-danger"></span>
-    </div>
-    
-    @if (Model.Id.HasValue && !string.IsNullOrWhiteSpace(Model.ExistingPictureAddress))
+    @if (TempData["Success"] is string msg)
     {
-        <div class="mb-3">
-            <label class="form-label">Current Picture</label><br />
-            <img src="@Model.ExistingPictureAddress" class="img-thumbnail" style="height:140px;" alt="" />
-        </div>
+    <div class="alert alert-success mt-3">@msg</div>
     }
 
-    <button type="submit" class="btn btn-primary">
-        @(Model.Id.HasValue ? "Save Changes" : "Save Movie")
-    </button>
-</form>
+    <div class="mb-panel mt-3">
+        <div class="mb-panel-body">
+
+            <form asp-action="Categorize" method="post" enctype="multipart/form-data">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                
+                <div class="row g-3">
+                    <div class="col-lg-5">
+                        <label asp-for="ListId" class="form-label">List</label>
+                        <select asp-for="ListId" asp-items="Model.Lists" class="form-select" id="listSelect">
+                            <option value="">-- Select a list --</option>
+                        </select>
+                        <span asp-validation-for="ListId" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-lg-7">
+                        <label asp-for="Title" class="form-label">Title</label>
+                        <input asp-for="Title" class="form-control" />
+                        <span asp-validation-for="Title" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="row mt-1">
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Year" class="form-label">Year</label>
+                        <input asp-for="Year" class="form-control" type="number" />
+                        <span asp-validation-for="Year" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-3 mb-3">
+                        <label asp-for="Length" class="form-label">Length (min)</label>
+                        <input asp-for="Length" class="form-control" type="number" />
+                        <span asp-validation-for="Length" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label">Language</label>
+                        
+                        <div style="display: flex; flex-direction: row">
+                            <div class="col-md-6">
+                                <select class="form-select" id="languageSelect" asp-for="Language">
+                                    <option value="">-- Select language --</option>
+
+                                    @foreach (var lang in Model.Languages)
+                                    {
+                                        // mark selected case-insensitively
+                                        var selected = !string.IsNullOrWhiteSpace(Model.Language)
+                                                       && lang.Value != null
+                                                       && lang.Value.Equals(Model.Language, StringComparison.OrdinalIgnoreCase);
+
+                                        <option value="@lang.Value" selected="@(selected ? "selected" : null)">@lang.Text</option>
+                                    }
+
+                                    <option value="__other__">Other...</option>
+                                </select>
+                            </div>
+                        
+                            <div class="col-md-6">
+                                <div id="newLanguageWrap" style="display:none; padding-left: 10px">
+                                    <input asp-for="NewLanguage" class="form-control" placeholder="Enter new language..." />
+                                    <span asp-validation-for="NewLanguage" class="text-danger"></span>
+                                </div>
+
+                                <span asp-validation-for="Language" class="text-danger"></span>
+                            </div>
+                        </div>
+                        
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-3 mb-3 form-check">
+                        <input asp-for="IsAvailable" class="form-check-input" id="isAvailableChk" />
+                        <label asp-for="IsAvailable" class="form-check-label">Available</label>
+                    </div>
+
+                    <div class="col-md-3 mb-3 form-check">
+                        <input asp-for="IsSeen" class="form-check-input" />
+                        <label asp-for="IsSeen" class="form-check-label">Seen</label>
+                    </div>
+                </div>
+
+                <div class="mb-3" id="localAddressWrap" style="display:none;">
+                    <label asp-for="LocalAddress" class="form-label">Local Address</label>
+                    <input asp-for="LocalAddress" class="form-control" />
+                    <span asp-validation-for="LocalAddress" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label">Categories</label>
+                    <div class="border rounded p-2" style="border-color: rgba(255,255,255,.10) !important; background: rgba(0,0,0,.10); max-height: 240px; overflow:auto;">
+                        @if (Model.Categories?.Count > 0)
+                        {
+                        foreach (var c in Model.Categories)
+                        {
+                        var cid = int.Parse(c.Value!);
+                        var isChecked = Model.SelectedCategoryIds.Contains(cid);
+
+                        <div class="form-check py-1">
+                            <input class="form-check-input"
+                                   type="checkbox"
+                                   name="SelectedCategoryIds"
+                                   value="@cid"
+                                   @(isChecked ? "checked" : "") />
+                            <label class="form-check-label">@c.Text</label>
+                        </div>
+                        }
+                        }
+                        else
+                        {
+                        <div class="text-muted">No categories found for this list.</div>
+                        }
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-lg-7">
+                        <label asp-for="PictureFile" class="form-label">Picture</label>
+                        <input asp-for="PictureFile" class="form-control" type="file" accept="image/*" />
+                        <span asp-validation-for="PictureFile" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-lg-5">
+                        @if (Model.Id.HasValue && !string.IsNullOrWhiteSpace(Model.ExistingPictureAddress))
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Current Picture</label><br />
+                                <img src="@Model.ExistingPictureAddress" class="img-thumbnail" style="height:140px;" alt="" />
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div class="d-flex gap-2 flex-wrap mt-2">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="bi bi-save2 me-2"></i>@(Model.Id.HasValue ? "Save Changes" : "Save Movie")
+                    </button>
+                </div>
+
+            </form>
+
+        </div>
+    </div>
+
+</div>
 
 @section Scripts {
 <partial name="_ValidationScriptsPartial" />

@@ -3,23 +3,51 @@
     ViewData["Title"] = "Error";
 }
 
-<h1 class="text-danger">Error.</h1>
-<h2 class="text-danger">An error occurred while processing your request.</h2>
+<div class="mb-page">
 
-@if (Model.ShowRequestId)
-{
-    <p>
-        <strong>Request ID:</strong> <code>@Model.RequestId</code>
-    </p>
-}
+    <div class="mb-panel mb-panel--gold mb-hero">
+        <div>
+            <h2 class="mb-title mb-0">
+                <i class="bi bi-exclamation-triangle-fill me-2" style="color: var(--mb-gold);"></i>
+                Error
+            </h2>
+            <div class="mb-subtitle">Something went wrong while processing your request.</div>
+            <div class="mb-divider"></div>
+        </div>
+    </div>
 
-<h3>Development Mode</h3>
-<p>
-    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
-</p>
-<p>
-    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
-    It can result in displaying sensitive information from exceptions to end users.
-    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
-    and restarting the app.
-</p>
+    <div class="mb-panel mt-3">
+        <div class="mb-panel-body">
+
+            <div class="p-3 rounded" style="background: rgba(0,0,0,.12); border: 1px solid rgba(255,255,255,.08);">
+                <h4 class="mb-title mb-1">An error occurred.</h4>
+                <div class="mb-subtitle mb-0">Try refreshing the page or returning to Home.</div>
+            </div>
+
+            @if (Model.ShowRequestId)
+            {
+                <div class="mt-3">
+                    <strong>Request ID:</strong> <code>@Model.RequestId</code>
+                </div>
+            }
+
+            <div class="mt-4">
+                <h5 class="mb-title mb-2">
+                    <i class="bi bi-bug-fill me-2" style="color: var(--mb-gold);"></i>
+                    Development Mode
+                </h5>
+                <p class="mb-subtitle mb-2">
+                    Swapping to <strong>Development</strong> environment will display more detailed information about the error that occurred.
+                </p>
+                <p class="mb-subtitle mb-0">
+                    <strong>The Development environment shouldn't be enabled for deployed applications.</strong>
+                    It can result in displaying sensitive information from exceptions to end users.
+                    For local debugging, enable the <strong>Development</strong> environment by setting the <strong>ASPNETCORE_ENVIRONMENT</strong> environment variable to <strong>Development</strong>
+                    and restarting the app.
+                </p>
+            </div>
+
+        </div>
+    </div>
+
+</div>
