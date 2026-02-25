@@ -28,9 +28,13 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo("/var/www/myapp/MovieBox/keys"))
     .SetApplicationName("MovieBox");
 
-builder.Services.AddAntiforgery(o =>
+builder.Services.AddAntiforgery(options =>
 {
-    o.Cookie.Path = "/moviebox";
+    if (builder.Environment.IsDevelopment()) { }
+    else
+    {
+        options.Cookie.Path = "/moviebox";
+    }
 });
 
 var app = builder.Build();

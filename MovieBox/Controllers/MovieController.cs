@@ -22,6 +22,9 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
     public async Task<IActionResult> Categorize(int? listId, int? movieId)
     {
         var vm = new CategorizeMovieVm();
+        
+        ViewData["ReturnUrl"] = Request.Headers.Referer.ToString();
+
 
         if (movieId.HasValue)
         {
@@ -53,7 +56,7 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Categorize(CategorizeMovieVm vm)
+    public async Task<IActionResult> Categorize(CategorizeMovieVm vm, string? returnUrl, string action)
     {
         await ReloadLookups(vm);
 
@@ -99,6 +102,22 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
             movie = new Movie { IsDeleted = false };
             db.Movies.Add(movie);
         }
+        
+        if (action == "remove" && vm.Id.HasValue)
+        {
+            var movieToDelete = await db.Movies.FirstOrDefaultAsync(m => m.Id == vm.Id.Value);
+            if (movieToDelete == null) return NotFound();
+
+            movieToDelete.IsDeleted = true;
+            await db.SaveChangesAsync();
+
+            TempData["Success"] = "Movie removed.";
+
+            if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
+                return Redirect(returnUrl);
+
+            return RedirectToAction(nameof(Filter), new { listId = movieToDelete.ListId });
+        }
 
         if (vm.PictureFile is not null && vm.PictureFile.Length > 0)
         {
@@ -131,8 +150,13 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         await db.SaveChangesAsync();
 
         TempData["Success"] = vm.Id.HasValue ? "Movie updated!" : "Movie added and categorized!";
-        return RedirectToAction(nameof(Categorize), new { listId = movie.ListId, movieId = movie.Id });
-    }
+        
+        if (!string.IsNullOrWhiteSpace(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction(nameof(Filter), new { listId = movie.ListId });    }
 
     private async Task ReloadLookups(CategorizeMovieVm vm)
     {

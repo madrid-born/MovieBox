@@ -28,6 +28,7 @@ ViewData["Title"] = "Categorize Movie";
             <form asp-action="Categorize" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
+                <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
                 
                 <div class="row g-3">
                     <div class="col-lg-5">
@@ -95,7 +96,7 @@ ViewData["Title"] = "Categorize Movie";
 
                 <div class="mb-3">
                     <label asp-for="Description" class="form-label">Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                    <textarea asp-for="Description" class="form-control" rows="7"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
@@ -163,9 +164,23 @@ ViewData["Title"] = "Categorize Movie";
                 </div>
 
                 <div class="d-flex gap-2 flex-wrap mt-2">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="bi bi-save2 me-2"></i>@(Model.Id.HasValue ? "Save Changes" : "Save Movie")
+
+                    <button type="submit" name="action" value="save" class="btn btn-primary">
+                        <i class="bi bi-save2 me-2"></i>
+                        @(Model.Id.HasValue ? "Save Changes" : "Save Movie")
                     </button>
+
+                    @if (Model.Id.HasValue)
+                    {
+                        <button type="submit"
+                                name="action"
+                                value="remove"
+                                class="btn btn-outline-danger"
+                                onclick="return confirm('Are you sure you want to remove this movie?');">
+                            <i class="bi bi-trash me-2"></i>Remove
+                        </button>
+                    }
+
                 </div>
 
             </form>
