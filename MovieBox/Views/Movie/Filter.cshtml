@@ -232,7 +232,23 @@
                                         @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
                                         {
                                             <div class="poster-wrapper">
-                                                <img src="~/@m.PictureAddress.TrimStart('/')" alt="@m.Title" />
+                                                @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
+                                                {
+                                                    <img src="~/@m.PictureAddress.TrimStart('/')" alt="@m.Title" />
+                                                }
+                                                else
+                                                {
+                                                    <div class="poster-placeholder">
+                                                        No Image
+                                                    </div>
+                                                }
+
+                                                <!-- Hover Overlay -->
+                                                <div class="poster-overlay">
+                                                    <div class="poster-description">
+                                                        @m.Description
+                                                    </div>
+                                                </div>
                                             </div>
                                         }
                                         else

@@ -31,5 +31,7 @@ public class FilterMoviesVm
         public bool? IsAvailable { get; set; }
         public bool? IsSeen { get; set; }
         public string? PictureAddress { get; set; }
+        public string? Description { get; set; }
+
     }
 }

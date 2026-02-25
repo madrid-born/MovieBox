@@ -319,15 +319,18 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         vm.Movies = await moviesQuery
             .OrderBy(m => m.Title)
             .Skip((page - 1) * pageSize)
-            .Take(pageSize).Select(m => new FilterMoviesVm.MovieRow
+            .Take(pageSize)
+            .Select(m => new FilterMoviesVm.MovieRow
             {
                 Id = m.Id,
                 Title = m.Title,
                 Year = m.Year,
                 IsAvailable = m.IsAvailable,
                 IsSeen = m.IsSeen,
-                PictureAddress = m.PictureAddress
-            }).ToListAsync();
+                PictureAddress = m.PictureAddress,
+                Description = m.Description
+            })
+            .ToListAsync();
 
         return View(vm);
     }
