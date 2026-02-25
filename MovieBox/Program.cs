@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using MovieBox.Models;
 
@@ -15,7 +17,26 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     )
 );
 
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto | ForwardedHeaders.XForwardedHost;
+    options.KnownProxies.Clear();
+    options.KnownNetworks.Clear();
+});
+
+builder.Services.AddDataProtection()
+    .PersistKeysToFileSystem(new DirectoryInfo("/var/www/myapp/MovieBox/keys"))
+    .SetApplicationName("MovieBox");
+
+builder.Services.AddAntiforgery(o =>
+{
+    o.Cookie.Path = "/moviebox";
+});
+
 var app = builder.Build();
+
+app.UsePathBase("/moviebox");
+app.UseForwardedHeaders();
 
 if (!app.Environment.IsDevelopment())
 {
