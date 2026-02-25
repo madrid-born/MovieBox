@@ -179,18 +179,22 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
 
     [HttpGet]
     public async Task<IActionResult> Filter(
-        int? listId,
-        List<int>? selectedCategoryIds,
-        int? minLength,
-        int? maxLength,
-        string? language,
-        int? minYear,
-        int? maxYear,
-        bool? isAvailable,
-        bool? isSeen,
-        bool? isDeleted = false
+    int? listId,
+    List<int>? selectedCategoryIds,
+    int? minLength,
+    int? maxLength,
+    string? language,
+    int? minYear,
+    int? maxYear,
+    bool? isAvailable,
+    bool? isSeen,
+    bool? isDeleted = false,
+    int page = 1
     )
     {
+        const int pageSize = 20;
+        if (page < 1) page = 1;
+
         selectedCategoryIds ??= new List<int>();
 
         var vm = new FilterMoviesVm
@@ -205,20 +209,30 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
             Language = language,
             MinYear = minYear,
             MaxYear = maxYear,
-            Lists = await db.Lists.OrderBy(l => l.Name).Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name }).ToListAsync()
+            Page = page,
+            PageSize = pageSize,
+            Lists = await db.Lists
+                .OrderBy(l => l.Name)
+                .Select(l => new SelectListItem { Value = l.Id.ToString(), Text = l.Name })
+                .ToListAsync()
         };
 
         if (listId is null) return View(vm);
 
-        vm.Categories = await db.Categories.Where(c => c.ListId == listId).OrderBy(c => c.Name)
-            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name }).ToListAsync();
+        vm.Categories = await db.Categories
+            .Where(c => c.ListId == listId)
+            .OrderBy(c => c.Name)
+            .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = c.Name })
+            .ToListAsync();
 
         var moviesQuery = db.Movies.Where(m => m.ListId == listId);
 
         if (selectedCategoryIds.Count > 0)
         {
-            var validSelected = await db.Categories.Where(c => c.ListId == listId && selectedCategoryIds.Contains(c.Id))
-                .Select(c => c.Id).ToListAsync();
+            var validSelected = await db.Categories
+                .Where(c => c.ListId == listId && selectedCategoryIds.Contains(c.Id))
+                .Select(c => c.Id)
+                .ToListAsync();
 
             vm.SelectedCategoryIds = validSelected;
             var selectedCount = validSelected.Count;
@@ -226,28 +240,38 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
             if (selectedCount == 0)
             {
                 vm.Movies = [];
+                vm.TotalCount = 0;
+                vm.TotalPages = 0;
                 return View(vm);
             }
 
-            var movieIds = await db.CategorizedItems.Where(ci => validSelected.Contains(ci.CategoryId))
-                .GroupBy(ci => ci.MovieId).Where(g => g.Select(x => x.CategoryId).Distinct().Count() == selectedCount)
-                .Select(g => g.Key).ToListAsync();
+            var movieIds = await db.CategorizedItems
+                .Where(ci => validSelected.Contains(ci.CategoryId))
+                .GroupBy(ci => ci.MovieId)
+                .Where(g => g.Select(x => x.CategoryId).Distinct().Count() == selectedCount)
+                .Select(g => g.Key)
+                .ToListAsync();
 
             moviesQuery = moviesQuery.Where(m => movieIds.Contains(m.Id));
         }
-        
-        var languagesRaw = await db.Movies.Where(m => m.ListId == listId && !string.IsNullOrWhiteSpace(m.Language))
-            .Select(m => m.Language!.Trim()).ToListAsync();
 
-        var distinctLanguages = languagesRaw.GroupBy(l => l.ToLower())
-            .Select(g => g.First()).OrderBy(l => l).ToList();
+        var languagesRaw = await db.Movies
+            .Where(m => m.ListId == listId && !string.IsNullOrWhiteSpace(m.Language))
+            .Select(m => m.Language!.Trim())
+            .ToListAsync();
+
+        var distinctLanguages = languagesRaw
+            .GroupBy(l => l.ToLower())
+            .Select(g => g.First())
+            .OrderBy(l => l)
+            .ToList();
 
         vm.Languages = distinctLanguages.Select(l => new SelectListItem
-            {
-                Value = l,
-                Text = l,
-                Selected = vm.Language != null && l.Equals(vm.Language, StringComparison.OrdinalIgnoreCase)
-            }).ToList();
+        {
+            Value = l,
+            Text = l,
+            Selected = vm.Language != null && l.Equals(vm.Language, StringComparison.OrdinalIgnoreCase)
+        }).ToList();
 
         if (isDeleted.HasValue) moviesQuery = moviesQuery.Where(m => m.IsDeleted == isDeleted.Value);
         if (isAvailable.HasValue) moviesQuery = moviesQuery.Where(m => m.IsAvailable == isAvailable.Value);
@@ -256,13 +280,22 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         if (maxLength.HasValue) moviesQuery = moviesQuery.Where(m => m.Length.HasValue && m.Length.Value <= maxLength.Value);
         if (!string.IsNullOrWhiteSpace(language))
         {
-            var lang = language.Trim().ToLower();
-            moviesQuery = moviesQuery.Where(m => m.Language != null && m.Language.Equals(lang, StringComparison.CurrentCultureIgnoreCase));
+            var lang = language.Trim();
+            moviesQuery = moviesQuery.Where(m => m.Language != null && m.Language.Equals(lang, StringComparison.OrdinalIgnoreCase));
         }
         if (minYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value >= minYear.Value);
         if (maxYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value <= maxYear.Value);
 
-        vm.Movies = await moviesQuery.OrderBy(m => m.Title).Select(m => new FilterMoviesVm.MovieRow
+        vm.TotalCount = await moviesQuery.CountAsync();
+        vm.TotalPages = (int)Math.Ceiling(vm.TotalCount / (double)pageSize);
+
+        if (vm.TotalPages > 0 && page > vm.TotalPages) page = vm.TotalPages;
+        vm.Page = page;
+
+        vm.Movies = await moviesQuery
+            .OrderBy(m => m.Title)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize).Select(m => new FilterMoviesVm.MovieRow
             {
                 Id = m.Id,
                 Title = m.Title,

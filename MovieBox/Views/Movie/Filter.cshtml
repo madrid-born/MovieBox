@@ -205,7 +205,7 @@
                 <div class="mb-panel-header">
                     <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
                         <div>
-                            <h4 class="mb-title mb-0">Results (@Model.Movies.Count)</h4>
+                            <h4 class="mb-title mb-0">Results (@Model.TotalCount)</h4>
                             <div class="mb-subtitle">Click a title to edit/categorize that movie.</div>
                         </div>
                     </div>
@@ -232,7 +232,7 @@
                                         @if (!string.IsNullOrWhiteSpace(m.PictureAddress))
                                         {
                                             <div class="poster-wrapper">
-                                                <img src="@m.PictureAddress" alt="@m.Title" />
+                                                <img src="~/@m.PictureAddress.TrimStart('/')" alt="@m.Title" />
                                             </div>
                                         }
                                         else
@@ -252,6 +252,66 @@
                         </div>
                     }
                 </div>
+                
+                @if (Model.TotalPages > 1)
+                {
+                    <nav class="mt-3">
+                        <ul class="pagination mb-0 flex-wrap">
+
+                            <li class="page-item @(Model.Page <= 1 ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-action="Filter"
+                                   asp-route-listId="@Model.ListId"
+                                   asp-route-page="@(Model.Page - 1)"
+                                   asp-route-selectedCategoryIds="@Model.SelectedCategoryIds"
+                                   asp-route-minLength="@Model.MinLength"
+                                   asp-route-maxLength="@Model.MaxLength"
+                                   asp-route-language="@Model.Language"
+                                   asp-route-minYear="@Model.MinYear"
+                                   asp-route-maxYear="@Model.MaxYear"
+                                   asp-route-isAvailable="@Model.IsAvailable"
+                                   asp-route-isSeen="@Model.IsSeen"
+                                   asp-route-isDeleted="@Model.IsDeleted">«</a>
+                            </li>
+
+                            @for (int p = 1; p <= Model.TotalPages; p++)
+                            {
+                                <li class="page-item @(p == Model.Page ? "active" : "")">
+                                    <a class="page-link"
+                                       asp-action="Filter"
+                                       asp-route-listId="@Model.ListId"
+                                       asp-route-page="@p"
+                                       asp-route-selectedCategoryIds="@Model.SelectedCategoryIds"
+                                       asp-route-minLength="@Model.MinLength"
+                                       asp-route-maxLength="@Model.MaxLength"
+                                       asp-route-language="@Model.Language"
+                                       asp-route-minYear="@Model.MinYear"
+                                       asp-route-maxYear="@Model.MaxYear"
+                                       asp-route-isAvailable="@Model.IsAvailable"
+                                       asp-route-isSeen="@Model.IsSeen"
+                                       asp-route-isDeleted="@Model.IsDeleted">@p</a>
+                                </li>
+                            }
+
+                            <li class="page-item @(Model.Page >= Model.TotalPages ? "disabled" : "")">
+                                <a class="page-link"
+                                   asp-action="Filter"
+                                   asp-route-listId="@Model.ListId"
+                                   asp-route-page="@(Model.Page + 1)"
+                                   asp-route-selectedCategoryIds="@Model.SelectedCategoryIds"
+                                   asp-route-minLength="@Model.MinLength"
+                                   asp-route-maxLength="@Model.MaxLength"
+                                   asp-route-language="@Model.Language"
+                                   asp-route-minYear="@Model.MinYear"
+                                   asp-route-maxYear="@Model.MaxYear"
+                                   asp-route-isAvailable="@Model.IsAvailable"
+                                   asp-route-isSeen="@Model.IsSeen"
+                                   asp-route-isDeleted="@Model.IsDeleted">»</a>
+                            </li>
+
+                        </ul>
+                    </nav>
+                }
             </div>
         }
     </div>
@@ -275,6 +335,8 @@
         
             ['isDeleted','isAvailable','isSeen','minLength','maxLength','language','minYear','maxYear'].forEach(p => {
               url.searchParams.delete(p);
+              url.searchParams.delete('page');
+              url.searchParams.delete('Page');
               url.searchParams.delete(p.charAt(0).toUpperCase() + p.slice(1));
             });
         

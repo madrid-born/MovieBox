@@ -4,6 +4,10 @@ namespace MovieBox.ViewModels;
 
 public class FilterMoviesVm
 {
+    public int Page { get; set; } = 1;
+    public int PageSize { get; set; } = 20;
+    public int TotalCount { get; set; }
+    public int TotalPages { get; set; }
     public int? ListId { get; set; }
     public List<int> SelectedCategoryIds { get; set; } = new();
     public List<MovieRow> Movies { get; set; } = [];
