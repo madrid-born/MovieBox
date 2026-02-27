@@ -304,8 +304,8 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
         if (maxLength.HasValue) moviesQuery = moviesQuery.Where(m => m.Length.HasValue && m.Length.Value <= maxLength.Value);
         if (!string.IsNullOrWhiteSpace(language))
         {
-            var lang = language.Trim();
-            moviesQuery = moviesQuery.Where(m => m.Language != null && m.Language.Equals(lang, StringComparison.OrdinalIgnoreCase));
+            var lang = language.Trim().ToLower();
+            moviesQuery = moviesQuery.Where(m => m.Language != null && m.Language.ToLower() == lang);
         }
         if (minYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value >= minYear.Value);
         if (maxYear.HasValue) moviesQuery = moviesQuery.Where(m => m.Year.HasValue && m.Year.Value <= maxYear.Value);
