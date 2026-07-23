@@ -216,7 +216,7 @@ public class MovieController(ApplicationDbContext db, IWebHostEnvironment env) :
     int page = 1
     )
     {
-        const int pageSize = 20;
+        const int pageSize = 1000;
         if (page < 1) page = 1;
 
         selectedCategoryIds ??= new List<int>();
